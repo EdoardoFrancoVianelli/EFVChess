@@ -31,6 +31,8 @@
 		A8531E371E52FBA6004D553F /* PlayerOptionsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8531E361E52FBA6004D553F /* PlayerOptionsViewController.swift */; };
 		A8531E3A1E5303C4004D553F /* keyboard_tap.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = A8531E391E5303C4004D553F /* keyboard_tap.mp3 */; };
 		A8531E3D1E530415004D553F /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A8531E3C1E530415004D553F /* AVFoundation.framework */; };
+		A8531E451E55073B004D553F /* wood-texture.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A8531E441E55073B004D553F /* wood-texture.jpg */; };
+		A8531E471E550B6E004D553F /* ChessStatusBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8531E461E550B6E004D553F /* ChessStatusBox.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -81,6 +83,8 @@
 		A8531E361E52FBA6004D553F /* PlayerOptionsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlayerOptionsViewController.swift; sourceTree = "<group>"; };
 		A8531E391E5303C4004D553F /* keyboard_tap.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = keyboard_tap.mp3; sourceTree = "<group>"; };
 		A8531E3C1E530415004D553F /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		A8531E441E55073B004D553F /* wood-texture.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "wood-texture.jpg"; sourceTree = "<group>"; };
+		A8531E461E550B6E004D553F /* ChessStatusBox.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChessStatusBox.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -112,6 +116,7 @@
 		A8531DDD1E405F4A004D553F = {
 			isa = PBXGroup;
 			children = (
+				A8531E441E55073B004D553F /* wood-texture.jpg */,
 				A8531E391E5303C4004D553F /* keyboard_tap.mp3 */,
 				A8531E331E4D3516004D553F /* Icons */,
 				A8531DE81E405F4B004D553F /* Chess */,
@@ -147,6 +152,7 @@
 				A8531E1B1E4061DB004D553F /* UIBoard.swift */,
 				A8531E211E4BF7AB004D553F /* Game.swift */,
 				A8531E231E4BF7B2004D553F /* Player.swift */,
+				A8531E461E550B6E004D553F /* ChessStatusBox.swift */,
 			);
 			path = Chess;
 			sourceTree = "<group>";
@@ -318,6 +324,7 @@
 				A8531E321E4D3510004D553F /* chess-rok.png in Resources */,
 				A8531DF11E405F4B004D553F /* Assets.xcassets in Resources */,
 				A8531E2D1E4D3510004D553F /* bishop.png in Resources */,
+				A8531E451E55073B004D553F /* wood-texture.jpg in Resources */,
 				A8531DEF1E405F4B004D553F /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -349,6 +356,7 @@
 				A8531E1C1E4061DB004D553F /* UIBoard.swift in Sources */,
 				A8531E241E4BF7B2004D553F /* Player.swift in Sources */,
 				A8531E1E1E406EE1004D553F /* UIChessPiece.swift in Sources */,
+				A8531E471E550B6E004D553F /* ChessStatusBox.swift in Sources */,
 				A8531DEA1E405F4B004D553F /* AppDelegate.swift in Sources */,
 				A8531E261E4BFAE6004D553F /* GameSelectionTableViewController.swift in Sources */,
 				A8531E351E4E3DAD004D553F /* DeletedPiecesTableViewController.swift in Sources */,

@@ -8,6 +8,8 @@
 
 import UIKit
 
+//wood texture from http://www.psdgraphics.com/file/wood-texture.jpg
+
 class ViewController: UIViewController, GameProtocol {
 
     var firstPlayerName : String = ""
