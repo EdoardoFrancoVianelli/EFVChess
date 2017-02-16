@@ -11,6 +11,29 @@ import UIKit
 @IBDesignable
 class ChessStatusBox: UIView {
     
+    @IBInspectable
+    var white : Bool = false{
+        didSet{
+            if white {
+                setWhite()
+            }
+        }
+    }
+    
+    var timerPaused : Bool = false{
+        didSet{
+            if timerPaused{
+                timer.invalidate()
+            }else{
+                initTimer()
+            }
+        }
+    }
+    
+    var timer = Timer()
+    
+    private var secondsPassed = 0
+    
     override var frame: CGRect{
         didSet{
             initialize()
@@ -31,7 +54,20 @@ class ChessStatusBox: UIView {
             imageDisplayer.image = image
         }
     }
+    
+    var title : String?{
+        get{
+            return pieceLabel.text
+        }set{
+            pieceLabel.text = newValue
+        }
+    }
 
+    func setWhite(){
+        self.image = self.image.withRenderingMode(.alwaysTemplate)
+        self.imageDisplayer.tintColor = UIColor.white
+    }
+    
     private func initImage(){
         let dimension = self.frame.height
         let offset : CGFloat = 1
@@ -45,7 +81,7 @@ class ChessStatusBox: UIView {
     }
     
     private func initLabel(){
-        pieceLabel.text = "Pawn"
+        pieceLabel.text = "Pawn" + "\n" + "00:00"
         pieceLabel.textAlignment = .center
         pieceLabel.numberOfLines = 2
         pieceLabel.frame.origin = CGPoint(x: imageDisplayer.frame.origin.x + imageDisplayer.frame.size.width,
@@ -57,12 +93,32 @@ class ChessStatusBox: UIView {
     
     private func initAspect(){
         self.layer.cornerRadius = 6
+        self.backgroundColor = UIColor.lightGray
+    }
+    
+    private func initTimer(){
+        timer = Timer(timeInterval: 1.0, repeats: true, block: updateLabel)
+        DispatchQueue.main.async {
+            RunLoop.current.add(self.timer, forMode: .commonModes)
+        }
+    }
+    
+    func updateLabel(timer : Timer){
+        let formatter = NumberFormatter()
+        formatter.minimumIntegerDigits = 2
+        secondsPassed += 1
+        if let minutes = formatter.string(from: NSNumber(value: secondsPassed / 60)){
+            if let seconds = formatter.string(from: NSNumber(value: secondsPassed % 60)){
+                title = "Pawn" + "\n" + "\(minutes):\(seconds)"
+            }
+        }
     }
     
     func initialize(){
         initImage()
         initLabel()
         initAspect()
+        initTimer()
     }
     
     required init?(coder aDecoder: NSCoder) {

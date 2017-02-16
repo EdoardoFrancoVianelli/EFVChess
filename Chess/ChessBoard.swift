@@ -253,6 +253,18 @@ class ChessBoard : ChessPieceProtocol, PlayerProtocol{
         return false
     }
     
+    private func diagonalMovement(_ oldPosition : (x : Int, y : Int), _ newPosition : (x : Int, y : Int)) -> Bool{
+        return abs(newPosition.x - oldPosition.x) == abs(newPosition.y - oldPosition.y)
+    }
+    
+    private func verticalMovement(_ oldPosition : (x : Int, y : Int), _ newPosition : (x : Int, y : Int)) -> Bool{
+        return oldPosition.x - newPosition.x == 0 && newPosition.y != oldPosition.y
+    }
+    
+    private func sidewaysMovement(_ oldPosition : (x : Int, y : Int), _ newPosition : (x : Int, y : Int)) -> Bool{
+        return oldPosition.y - newPosition.y == 0 && newPosition.x != oldPosition.x
+    }
+    
     private func changeAllowed(piece : ChessPiece, newPosition : (x : Int, y : Int), inclusive : Bool) -> Bool{
         
         //check based on the allowable movements
@@ -266,21 +278,20 @@ class ChessBoard : ChessPieceProtocol, PlayerProtocol{
             y_inc = 0
         }
         
-        let diagonal = abs(newPosition.x - piece.x) == abs(newPosition.y - piece.y)
-        let vertical = piece.x - newPosition.x == 0 && newPosition.y != piece.y
-        let sideways = piece.y - newPosition.y == 0 && newPosition.x != piece.x
+        let diagonal = diagonalMovement(piece.origin, newPosition)
+        let vertical = verticalMovement(piece.origin, newPosition)
+        let sideways = sidewaysMovement(piece.origin, newPosition)
         
-        var end = newPosition
-        
-        if inclusive{
-            end = (end.x + x_inc, end.y + y_inc)
-        }
+        let end = !inclusive ? newPosition : (newPosition.x + x_inc, newPosition.y + y_inc)
         
         let interference = CheckBetween(startLocation: (piece.x, piece.y), endLocation: end, increments: (x_inc, y_inc))
         var allowed = false
         
         if diagonal && !(piece is Knight){ //diagonal
             allowed = piece.allowedMovement.canMoveDirectlyDiagonally && !interference
+            if piece is King{
+                allowed = allowed && abs(newPosition.x - piece.x) == 1
+            }
         }else if vertical{ //going straight up or down
             let diff = piece.y - newPosition.y
             if (piece is Pawn){

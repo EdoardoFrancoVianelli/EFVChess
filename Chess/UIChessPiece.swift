@@ -14,6 +14,22 @@ protocol UIChessPieceProtocol{
     func pieceDeselected(piece : ChessPiece)
 }
 
+func imageForPiece(piece : ChessPiece) -> UIImage?{
+    if piece is Pawn{
+        return UIImage(named: "chess-pawn.png")
+    }else if piece is Bishop{
+        return UIImage(named: "bishop.png")
+    }else if piece is King{
+        return UIImage(named: "chess-king.png")
+    }else if piece is Queen{
+        return UIImage(named: "chess-queen.png")
+    }else if piece is Rook{
+        return UIImage(named: "chess-rok.png")
+    }else {
+        return UIImage(named: "chess-knight.png")
+    }
+}
+
 class UIChessPiece : UIView{
     
     private var image = UIImageView()
@@ -104,19 +120,7 @@ class UIChessPiece : UIView{
     private func initAspect(){
         self.updateImageFrame()
         self.image.contentMode = .scaleAspectFit
-        if piece is Pawn{
-            self.image.image = UIImage(named: "chess-pawn.png")
-        }else if piece is Bishop{
-            self.image.image = UIImage(named: "bishop.png")
-        }else if piece is King{
-            self.image.image = UIImage(named: "chess-king.png")
-        }else if piece is Queen{
-            self.image.image = UIImage(named: "chess-queen.png")
-        }else if piece is Rook{
-            self.image.image = UIImage(named: "chess-rok.png")
-        }else if piece is Knight{
-            self.image.image = UIImage(named: "chess-knight.png")
-        }
+        self.image.image = imageForPiece(piece: piece)
         self.addSubview(image)
     }
     

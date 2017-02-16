@@ -153,43 +153,51 @@
                                     <constraint firstAttribute="width" secondItem="Ws0-oN-g9Q" secondAttribute="height" multiplier="1:1" id="VgE-80-O1S"/>
                                 </constraints>
                             </view>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" minimumFontSize="9" translatesAutoresizingMaskIntoConstraints="NO" id="djg-MW-t3C">
-                                <rect key="frame" x="26" y="541" width="323" height="34.5"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumFontSize="9" translatesAutoresizingMaskIntoConstraints="NO" id="djg-MW-t3C">
+                                <rect key="frame" x="26" y="531" width="323" height="17"/>
                                 <string key="text">Player 1's turn
 </string>
-                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                <nil key="textColor"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="20"/>
+                                <color key="textColor" red="1" green="1" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="WG0-27-n7S" customClass="ChessStatusBox" customModule="Chess" customModuleProvider="target">
-                                <rect key="frame" x="26" y="590.5" width="100" height="56.5"/>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="O6G-Oj-rhl" customClass="ChessStatusBox" customModule="Chess" customModuleProvider="target">
+                                <rect key="frame" x="16" y="568" width="131.5" height="79"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" secondItem="O6G-Oj-rhl" secondAttribute="height" multiplier="5:3" id="EiM-WL-oNi"/>
+                                </constraints>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="boolean" keyPath="white" value="YES"/>
+                                </userDefinedRuntimeAttributes>
                             </view>
-                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="nJt-n3-MdT" customClass="ChessStatusBox" customModule="Chess" customModuleProvider="target">
-                                <rect key="frame" x="259" y="590.5" width="100" height="56.5"/>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="z4U-ib-WNJ" customClass="ChessStatusBox" customModule="Chess" customModuleProvider="target">
+                                <rect key="frame" x="227.5" y="568" width="131.5" height="79"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" secondItem="z4U-ib-WNJ" secondAttribute="height" multiplier="5:3" id="Mbz-n9-NmC"/>
+                                </constraints>
                             </view>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                         <constraints>
-                            <constraint firstItem="WG0-27-n7S" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" constant="10" id="0Md-Zl-Vbo"/>
-                            <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="nJt-n3-MdT" secondAttribute="bottom" constant="20" id="AlR-dS-379"/>
-                            <constraint firstItem="djg-MW-t3C" firstAttribute="top" secondItem="Ws0-oN-g9Q" secondAttribute="bottom" constant="20" id="Du1-0X-uWw"/>
-                            <constraint firstItem="djg-MW-t3C" firstAttribute="leading" secondItem="WG0-27-n7S" secondAttribute="trailing" constant="-100" id="ERv-Ec-VPy"/>
+                            <constraint firstItem="djg-MW-t3C" firstAttribute="top" secondItem="Ws0-oN-g9Q" secondAttribute="bottom" constant="10" id="Du1-0X-uWw"/>
                             <constraint firstItem="Ws0-oN-g9Q" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="J3z-Zv-7nT"/>
                             <constraint firstItem="Ws0-oN-g9Q" firstAttribute="centerY" secondItem="8bC-Xf-vdC" secondAttribute="centerY" id="JuU-1a-Nq7"/>
-                            <constraint firstItem="WG0-27-n7S" firstAttribute="top" secondItem="djg-MW-t3C" secondAttribute="bottom" constant="15" id="Lp4-qN-UM5"/>
-                            <constraint firstItem="nJt-n3-MdT" firstAttribute="top" secondItem="djg-MW-t3C" secondAttribute="bottom" constant="15" id="N9z-gP-uVn"/>
-                            <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="WG0-27-n7S" secondAttribute="bottom" constant="20" id="OAm-dE-aiH"/>
                             <constraint firstItem="Ws0-oN-g9Q" firstAttribute="width" secondItem="8bC-Xf-vdC" secondAttribute="width" id="QKl-Jb-pKX"/>
-                            <constraint firstItem="nJt-n3-MdT" firstAttribute="trailing" secondItem="8bC-Xf-vdC" secondAttribute="trailingMargin" id="ZnV-9z-T9b"/>
-                            <constraint firstItem="nJt-n3-MdT" firstAttribute="leading" secondItem="djg-MW-t3C" secondAttribute="trailing" constant="-90" id="e3L-2E-orW"/>
+                            <constraint firstItem="O6G-Oj-rhl" firstAttribute="top" secondItem="djg-MW-t3C" secondAttribute="bottom" constant="20" id="SLE-WL-wM2"/>
+                            <constraint firstItem="z4U-ib-WNJ" firstAttribute="trailing" secondItem="8bC-Xf-vdC" secondAttribute="trailingMargin" id="TB7-bU-pm3"/>
+                            <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="z4U-ib-WNJ" secondAttribute="bottom" constant="20" id="Ujr-0N-znS"/>
+                            <constraint firstItem="z4U-ib-WNJ" firstAttribute="top" secondItem="djg-MW-t3C" secondAttribute="bottom" constant="20" id="XL8-y8-cWz"/>
+                            <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="O6G-Oj-rhl" secondAttribute="bottom" constant="20" id="hth-aj-CXu"/>
                             <constraint firstItem="MGb-A0-y9L" firstAttribute="width" secondItem="8bC-Xf-vdC" secondAttribute="width" id="j8m-B1-DOC"/>
                             <constraint firstItem="MGb-A0-y9L" firstAttribute="height" secondItem="8bC-Xf-vdC" secondAttribute="height" id="kOE-uN-mhq"/>
+                            <constraint firstItem="O6G-Oj-rhl" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" id="lcj-z5-MXn"/>
                             <constraint firstItem="MGb-A0-y9L" firstAttribute="centerY" secondItem="8bC-Xf-vdC" secondAttribute="centerY" id="sh0-8D-P3o"/>
                             <constraint firstItem="MGb-A0-y9L" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="sh0-eh-3aT"/>
                             <constraint firstAttribute="trailingMargin" secondItem="djg-MW-t3C" secondAttribute="trailing" constant="10" id="snB-WL-ag8"/>
                             <constraint firstItem="djg-MW-t3C" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" constant="10" id="v4e-d4-DcG"/>
+                            <constraint firstItem="z4U-ib-WNJ" firstAttribute="leading" secondItem="O6G-Oj-rhl" secondAttribute="trailing" constant="80" id="y7h-0J-f8a"/>
                         </constraints>
                     </view>
                     <toolbarItems>
@@ -197,6 +205,8 @@
                     </toolbarItems>
                     <connections>
                         <outlet property="board" destination="Ws0-oN-g9Q" id="DZM-w4-XKd"/>
+                        <outlet property="player1Box" destination="O6G-Oj-rhl" id="ZUe-av-6QC"/>
+                        <outlet property="player2Box" destination="z4U-ib-WNJ" id="QWh-jN-RtD"/>
                         <outlet property="statusLabel" destination="djg-MW-t3C" id="orn-FW-xsC"/>
                         <segue destination="CiQ-Nh-quL" kind="show" identifier="deletedPiecesSegue" id="JDD-26-21g"/>
                     </connections>

@@ -12,6 +12,12 @@ import UIKit
 
 class ViewController: UIViewController, GameProtocol {
 
+    @IBOutlet weak var player2Box: ChessStatusBox!
+    @IBOutlet weak var player1Box: ChessStatusBox!
+    
+    var firstTimer = Timer()
+    var secondTimer = Timer()
+    
     var firstPlayerName : String = ""
     var secondPlayerName : String = ""
     
@@ -20,13 +26,17 @@ class ViewController: UIViewController, GameProtocol {
     
     var currentPlayer = Player(name: "Player 1", id: 1){
         didSet{
-            setStatusLabel()
         }
     }
     
     var selectedPiece : ChessPiece? = ChessPiece(x: 0, y: 0, movement: PawnMovement(), player: Player(name: "", id: 1)){
         didSet{
-            setStatusLabel()
+            if (self.currentPlayer.id == 1 && selectedPiece?.player.id == 1){
+                player1Box.image = imageForPiece(piece: selectedPiece!)!
+                player1Box.setWhite()
+            }else if (self.currentPlayer.id == 2 && selectedPiece?.player.id == 2){
+                player2Box.image = imageForPiece(piece: selectedPiece!)!
+            }
         }
     }
     
@@ -42,16 +52,11 @@ class ViewController: UIViewController, GameProtocol {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
-
-    func setStatusLabel(){
-        statusLabel.text = currentPlayer.name + "'s turn\n"
-        if let select = selectedPiece{
-            statusLabel.text! += select.name + "\(select.origin)"
-        }
-    }
     
     func didSwitchTurn(player: Player) {
         self.currentPlayer = player
+        player1Box.timerPaused = self.currentPlayer.id != 1
+        player2Box.timerPaused = !player1Box.timerPaused
     }
     
     func pieceSelected(piece: ChessPiece) {
