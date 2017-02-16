@@ -85,11 +85,7 @@ class ChessBoard : ChessPieceProtocol, PlayerProtocol{
     }
     
     func nameDidChange(previousName: String, newName: String) {
-        for val in self.board{
-            if val.value.player.name == previousName{
-                self.board[val.key]?.player.name = newName
-            }
-        }
+        
     }
     
     private func pieceCanEat(piece : ChessPiece, other : ChessPiece) -> Bool{

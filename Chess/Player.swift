@@ -12,7 +12,7 @@ protocol PlayerProtocol{
     func nameDidChange(previousName : String, newName : String)
 }
 
-class Player : Equatable {
+class Player : Equatable, CustomStringConvertible {
     
     var delegate : PlayerProtocol?
     
@@ -21,6 +21,10 @@ class Player : Equatable {
     
     var id : Int{
         return self._id
+    }
+    
+    var description: String{
+        return "\(name) : \(id)"
     }
     
     var name : String{

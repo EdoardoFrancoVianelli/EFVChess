@@ -26,6 +26,12 @@ class ViewController: UIViewController, GameProtocol {
     
     var currentPlayer = Player(name: "Player 1", id: 1){
         didSet{
+            statusLabel.text = "\(currentPlayer.name)'s turn"
+            if currentPlayer.id == 1{
+                statusLabel.textAlignment = .left
+            }else{
+                statusLabel.textAlignment = .right
+            }
         }
     }
     
@@ -42,6 +48,7 @@ class ViewController: UIViewController, GameProtocol {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.navigationController?.setNavigationBarHidden(true, animated: true)
         self.board.game.delegate = self
         self.currentPlayer = Player(name: firstPlayerName, id: 1)
         self.board.game.setPlayerNames(p1: firstPlayerName, p2: secondPlayerName)

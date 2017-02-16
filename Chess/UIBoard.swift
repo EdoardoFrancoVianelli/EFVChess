@@ -49,10 +49,6 @@ class UIBoard : UIView, ChessBoardProtocol, UIChessPieceProtocol{
         initialize()
     }
     
-    func setPlayerNames(p1 : String, p2 : String){
-        
-    }
-    
     private func addPiece(piece : ChessPiece){
         model.addPiece(piece: piece)
     }

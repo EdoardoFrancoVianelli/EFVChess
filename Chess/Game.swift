@@ -29,8 +29,17 @@ class Game{
     
     var delegate : GameProtocol?
         
-    private var _player1 : Player
-    private var _player2 : Player
+    private var _player1 : Player{
+        didSet{
+            print("Setting player 1")
+        }
+    }
+    private var _player2 : Player{
+        didSet{
+            print("Setting player 2")
+        }
+    }
+
     
     var firstPlayer : Player{
         return _player1
