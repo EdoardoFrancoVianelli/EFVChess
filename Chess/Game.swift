@@ -19,6 +19,8 @@ class Game{
     private var player1removed = [ChessPiece]()
     private var player2removed = [ChessPiece]()
     
+    var board = ChessBoard(player1Name: "", player2Name: "")
+    
     var player1Deleted : [ChessPiece]{
         return player1removed
     }
@@ -28,6 +30,13 @@ class Game{
     }
     
     var delegate : GameProtocol?
+    var boardDelegate : ChessBoardProtocol?{
+        set{
+            board.delegate = newValue
+        }get{
+            return board.delegate
+        }
+    }
         
     private var _player1 : Player{
         didSet{
@@ -94,6 +103,101 @@ class Game{
     func setPlayerNames(p1 : String, p2 : String){
         self._player1.name = p1
         self._player2.name = p2
+    }
+    
+    func changePiecePosition(piece: ChessPiece, newPosition : (x : Int, y : Int)){
+        
+        if piece.player != currentPlayer{
+            return
+        }
+        let diff = piece.y - newPosition.y
+        if self.board.canChangePiecePosition(piece: piece, newPosition: newPosition){
+            
+            /*Avoid pawn moving backwards*/
+            
+            if piece is Pawn{
+                
+                if diff < 0 && !firstPlayerTurn || (diff > 0 && firstPlayerTurn){ //direction is downward
+                    return
+                }
+            }
+            
+            piece.origin = (newPosition.x, newPosition.y)
+            self.switchTurns()
+        }else{
+            if let pawn = piece as? Pawn{
+                if !(pawn.allowedMovement as! PawnMovement).movedTwo && abs(diff) == 2 && piece.player == currentPlayer{
+                    (piece.allowedMovement as! PawnMovement).movedTwo = true
+                    pawn.origin = newPosition
+                    self.switchTurns()
+                }
+            }
+        }
+    }
+    
+    func addPiece(piece : ChessPiece){
+        self.board.addPiece(piece: piece)
+    }
+    
+    func consumePiece(piece1 : ChessPiece, piece2 : ChessPiece) -> Bool{
+        if piece1.player == piece2.player || currentPlayer != piece1.player{
+            return false
+        }
+        
+        if self.board.consumePiece(piece1: piece1, piece2: piece2){
+            pieceRemoved(piece: piece2)
+            switchTurns()
+        }
+        
+        return true
+    }
+
+    func startGame(){
+        self.board.removeAllPieces()
+        self.initPawns()
+        self.initRooks()
+        self.initKnights()
+        self.initBishops()
+        self.initKings()
+        self.initQueens()
+    }
+    
+    private func initPawns(){
+        for i in 0..<8{
+            board.addPiece(piece: Pawn(x: i, y: 1, movement: PawnMovement(), player: firstPlayer))
+            board.addPiece(piece: Pawn(x: i, y: 6, movement: PawnMovement(), player: secondPlayer))
+        }
+    }
+    
+    private func initRooks(){
+        addPiece(piece: Rook(x: 0, y: 0, movement: RookMovement(), player: firstPlayer))
+        addPiece(piece: Rook(x: 7, y: 0, movement: RookMovement(), player: firstPlayer))
+        addPiece(piece: Rook(x: 0, y: 7, movement: RookMovement(), player: secondPlayer))
+        addPiece(piece: Rook(x: 7, y: 7, movement: RookMovement(), player: secondPlayer))
+    }
+    
+    private func initKnights(){
+        addPiece(piece: Knight(x: 1, y: 0, movement: KnightMovement(), player: firstPlayer))
+        addPiece(piece: Knight(x: 6, y: 0, movement: KnightMovement(), player: firstPlayer))
+        addPiece(piece: Knight(x: 1, y: 7, movement: KnightMovement(), player: secondPlayer))
+        addPiece(piece: Knight(x: 6, y: 7, movement: KnightMovement(), player: secondPlayer))
+    }
+    
+    private func initBishops(){
+        addPiece(piece: Bishop(x: 2, y: 0, movement: BishopMovement(), player: firstPlayer))
+        addPiece(piece: Bishop(x: 5, y: 0, movement: BishopMovement(), player: firstPlayer))
+        addPiece(piece: Bishop(x: 2, y: 7, movement: BishopMovement(), player: secondPlayer))
+        addPiece(piece: Bishop(x: 5, y: 7, movement: BishopMovement(), player: secondPlayer))
+    }
+    
+    private func initKings(){
+        addPiece(piece: King(x: 4, y: 0, movement: KingMovement(), player: firstPlayer))
+        addPiece(piece: King(x: 4, y: 7, movement: KingMovement(), player: secondPlayer))
+    }
+    
+    private func initQueens(){
+        addPiece(piece: Queen(x: 3, y: 0, movement: QueenMovement(), player: firstPlayer))
+        addPiece(piece: Queen(x: 3, y: 7, movement: QueenMovement(), player: secondPlayer))
     }
 }
 

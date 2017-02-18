@@ -14,78 +14,13 @@ protocol ChessBoardProtocol {
     func pieceRemoved(piece : ChessPiece)
 }
 
-class ChessBoard : ChessPieceProtocol, PlayerProtocol{
+class ChessBoard : ChessPieceProtocol {
     
-    var currentGame : Game{
-        return game
-    }
-    
-    private var game  : Game
     private var board = Dictionary<String, ChessPiece>()
     var delegate : ChessBoardProtocol?
     
     init(player1Name : String, player2Name : String){
         self.board = Dictionary<String, ChessPiece>()
-        self.game = Game(p1: Player(name: player1Name, id: 1), p2: Player(name: player2Name, id: 2))
-        self.game.firstPlayer.delegate = self
-        self.game.secondPlayer.delegate = self
-    }
-    
-    private func initPawns(){
-        for i in 0..<8{
-            addPiece(piece: Pawn(x: i, y: 1, movement: PawnMovement(), player: game.firstPlayer))
-            addPiece(piece: Pawn(x: i, y: 6, movement: PawnMovement(), player: game.secondPlayer))
-        }
-    }
-    
-    private func initRooks(){
-        addPiece(piece: Rook(x: 0, y: 0, movement: RookMovement(), player: game.firstPlayer))
-        addPiece(piece: Rook(x: 7, y: 0, movement: RookMovement(), player: game.firstPlayer))
-        addPiece(piece: Rook(x: 0, y: 7, movement: RookMovement(), player: game.secondPlayer))
-        addPiece(piece: Rook(x: 7, y: 7, movement: RookMovement(), player: game.secondPlayer))
-    }
-    
-    private func initKnights(){
-        addPiece(piece: Knight(x: 1, y: 0, movement: KnightMovement(), player: game.firstPlayer))
-        addPiece(piece: Knight(x: 6, y: 0, movement: KnightMovement(), player: game.firstPlayer))
-        addPiece(piece: Knight(x: 1, y: 7, movement: KnightMovement(), player: game.secondPlayer))
-        addPiece(piece: Knight(x: 6, y: 7, movement: KnightMovement(), player: game.secondPlayer))
-    }
-    
-    private func initBishops(){
-        addPiece(piece: Bishop(x: 2, y: 0, movement: BishopMovement(), player: game.firstPlayer))
-        addPiece(piece: Bishop(x: 5, y: 0, movement: BishopMovement(), player: game.firstPlayer))
-        addPiece(piece: Bishop(x: 2, y: 7, movement: BishopMovement(), player: game.secondPlayer))
-        addPiece(piece: Bishop(x: 5, y: 7, movement: BishopMovement(), player: game.secondPlayer))
-    }
-    
-    private func initKings(){
-        addPiece(piece: King(x: 4, y: 0, movement: KingMovement(), player: game.firstPlayer))
-        addPiece(piece: King(x: 4, y: 7, movement: KingMovement(), player: game.secondPlayer))
-    }
-    
-    private func initQueens(){
-        addPiece(piece: Queen(x: 3, y: 0, movement: QueenMovement(), player: game.firstPlayer))
-        addPiece(piece: Queen(x: 3, y: 7, movement: QueenMovement(), player: game.secondPlayer))
-    }
-    
-    private func inRange(piece : ChessPiece, destination : (x : Int, y : Int)) -> Bool{
-        if piece.x < destination.x && piece.y < destination.y{
-            return piece.x + piece.allowedMovement.right >= destination.x && piece.y + piece.allowedMovement.forward <= destination.y
-        }else if piece.x < destination.x && piece.y >= destination.y{
-            return piece.x + piece.allowedMovement.right >= destination.x && piece.y - piece.allowedMovement.backwards <= destination.y
-        }
-        else if piece.x >= destination.x && piece.y < destination.y{
-            return piece.x - piece.allowedMovement.left <= destination.x && piece.y + piece.allowedMovement.forward >= destination.y
-        }
-        else if piece.x >= destination.x && piece.y >= destination.y{
-            return piece.x - piece.allowedMovement.left <= destination.x && piece.y - piece.allowedMovement.backwards >= destination.y
-        }
-        return true
-    }
-    
-    func nameDidChange(previousName: String, newName: String) {
-        
     }
     
     private func pieceCanEat(piece : ChessPiece, other : ChessPiece) -> Bool{
@@ -116,9 +51,18 @@ class ChessBoard : ChessPieceProtocol, PlayerProtocol{
             }
             print("\(i),\(piece.y)")
             if let currentPiece = self.board["\(i)\(piece.y)"]{
-                if pieceCanEat(piece: currentPiece, other: piece){
+                
+                //check if the current piece can consume the other piece
+                
+                let diff = abs(i - piece.x)
+                
+                print("Found \(currentPiece)")
+                
+                if ((diff > 1) && (piece is Rook) || (piece is Queen)) || (diff == 1 && piece is King){
                     return true
                 }
+                
+                break;
             }
         }
         
@@ -132,38 +76,53 @@ class ChessBoard : ChessPieceProtocol, PlayerProtocol{
             }
             print("\(piece.x),\(i)")
             if let currentPiece = self.board["\(piece.x)\(i)"]{
-                if pieceCanEat(piece: currentPiece, other: piece){
+                
+                print("Found \(currentPiece)")
+                
+                let diff = abs(i - piece.y)
+                
+                if ((diff > 1) && (piece is Rook) || (piece is Queen)) || (diff == 1 && piece is King){
                     return true
                 }
+                
+                break;
             }
         }
         
         //check diagonals
         
-        var x = -1
-        var y = piece.origin.y - piece.origin.x - 1
+        let diagonal_descr = ["Lower right", "Upper left", "Upper right", "Lower left"]
+        let increments : [(x : Int, y : Int)] = [(1,1), (-1, -1), (1,-1), (-1, 1)]
         
-        print("Diagonal")
-        
-        for _ in 0..<8{
-            
-            x += 1
-            y += 1
-            
-            if piece.x == x && piece.y == y || (piece.x - x == x && piece.y - y == y){
-                continue
-            }
-            
-            print("(\(x),\(y))")
-            
-            if let currentPiece = self.board["\(x)\(y)"]{
-                if pieceCanEat(piece: currentPiece, other: piece){
-                    return true
+        for (i, increment) in increments.enumerated(){
+            var current : (x : Int, y : Int) = (piece.origin.x + increment.x, piece.origin.y + increment.y)
+            print(diagonal_descr[i])
+            while current.x >= 0 && current.x < 8 && current.y >= 0 && current.y < 8{
+                if let currentPiece = self.board["\(current.x)\(current.y)"]{
+                    
+                    print("Found \(currentPiece)")
+                    
+                    let y_diff = currentPiece.y - piece.y //if y is greater than 0, is is below, otherwise it is abow
+                    let diff = abs(current.x - piece.x)
+                    
+                    if ((diff > 1) && (piece is Bishop) || (piece is Queen)) || (diff == 1 && (piece is King || piece is Pawn)){
+                        
+                        if (piece is Pawn){
+                            if y_diff > 0 && currentPiece.player.id == 1{
+                                break
+                            }else if y_diff < 0 && currentPiece.player.id == 2{
+                                break
+                            }
+                        }
+                        
+                        return true
+                    }
+                    
+                    break;
                 }
-            }
-            
-            if x > 8 || y > 9{
-                break
+                print("(\(current.x), \(current.y))")
+                current.x += increment.x
+                current.y += increment.y
             }
         }
         
@@ -171,30 +130,16 @@ class ChessBoard : ChessPieceProtocol, PlayerProtocol{
     }
     
     func consumePiece(piece1 : ChessPiece, piece2 : ChessPiece) -> Bool{
-        if piece1.player == piece2.player || game.currentPlayer != piece1.player{
-            return false
-        }
         
         if pieceCanEat(piece: piece1, other: piece2){
             removePiece(piece: piece2)
             piece1.origin = (piece2.x, piece2.y)
-            game.pieceRemoved(piece: piece2)
-            game.switchTurns()
             return true
         }else {
             print("\(piece1) cannot eat \(piece2)")
         }
         
         return false
-    }
-    
-    func startGame(){
-        self.initPawns()
-        self.initRooks()
-        self.initKnights()
-        self.initBishops()
-        self.initKings()
-        self.initQueens()
     }
     
     private func CheckBetween(startLocation : (x : Int, y : Int),
@@ -292,21 +237,7 @@ class ChessBoard : ChessPieceProtocol, PlayerProtocol{
             let diff = piece.y - newPosition.y
             if (piece is Pawn){
                 let movement_allowed = (piece.allowedMovement.canMoveDirectlyForward && abs(diff) <= piece.allowedMovement.forward && !interference)
-                if !movement_allowed{
-                    if piece is Pawn{
-                        if !(piece.allowedMovement as! PawnMovement).movedTwo && abs(diff) == 2 && piece.player == game.currentPlayer
-                        {
-                            (piece.allowedMovement as! PawnMovement).movedTwo = true
-                            allowed = true
-                        }
-                    }
-                }
-                
-                if diff < 0{ //direction is downward
-                    return (movement_allowed || allowed) && game.firstPlayerTurn
-                }else{ //direction is upward
-                    return (movement_allowed || allowed) && !game.firstPlayerTurn
-                }
+                return movement_allowed
             }else{
                 if diff < 0{ //going backwards
                     allowed = piece.allowedMovement.canMoveDirectlyBackwards && abs(diff) <= piece.allowedMovement.backwards && !interference
@@ -343,30 +274,36 @@ class ChessBoard : ChessPieceProtocol, PlayerProtocol{
             }
         }
         
-        return allowed && piece.player == game.currentPlayer
+        return allowed
     }
     
-    func changePiecePosition(piece : ChessPiece, newPosition : (x : Int, y : Int)){
+    func canChangePiecePosition(piece : ChessPiece, newPosition : (x : Int, y : Int)) -> Bool{
         
         //verify legitimacy of position change
         
         if !changeAllowed(piece: piece, newPosition: newPosition, inclusive: true){
             print("Cannot move \(piece) to \(newPosition)")
             print(self.board.count)
-            return
+            return false
         }
-        
-        game.switchTurns()
         
         if piece is Pawn{
             (piece.allowedMovement as? PawnMovement)?.movedTwo = true
         }
         
-        piece.origin = (newPosition.x, newPosition.y)
+        return true
     }
     
     func positionDidChange(piece: ChessPiece, oldPosition : (x : Int, y : Int)) {
-        //pieceVulnerable(piece: piece)
+        
+        DispatchQueue.main.async {
+            if (self.pieceVulnerable(piece: piece)){
+                print("Piece is not safe in this position")
+            }else{
+                print("Piece is safe in this position")
+            }
+        }
+        
         self.board.removeValue(forKey: "\(oldPosition.x)\(oldPosition.y)")
         self.board["\(piece.x)\(piece.y)"] = piece
         delegate?.pieceDidChangePosition(piece: piece, oldPosition: oldPosition)
@@ -378,8 +315,30 @@ class ChessBoard : ChessPieceProtocol, PlayerProtocol{
         self.delegate?.pieceAdded(piece: piece)
     }
     
+    func removeAllPieces(){
+        for element in self.board{
+            removePiece(piece: element.value)
+        }
+        
+        self.board = Dictionary<String, ChessPiece>()
+    }
+    
     func removePiece(piece : ChessPiece){
         self.board.removeValue(forKey: "\(piece.x)\(piece.y)")
         self.delegate?.pieceRemoved(piece: piece)
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+

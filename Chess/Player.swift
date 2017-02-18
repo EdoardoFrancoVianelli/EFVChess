@@ -8,13 +8,7 @@
 
 import Foundation
 
-protocol PlayerProtocol{
-    func nameDidChange(previousName : String, newName : String)
-}
-
 class Player : Equatable, CustomStringConvertible {
-    
-    var delegate : PlayerProtocol?
     
     private var _name : String
     private var _id : Int
@@ -32,9 +26,7 @@ class Player : Equatable, CustomStringConvertible {
             return self._name
         }
         set {
-            let oldValue = name
             self._name = newValue
-            delegate?.nameDidChange(previousName: oldValue, newName: name)
         }
     }
     

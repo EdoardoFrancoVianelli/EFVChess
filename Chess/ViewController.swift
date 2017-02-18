@@ -42,6 +42,7 @@ class ViewController: UIViewController, GameProtocol {
     }
     
     @IBAction func newGame() {
+        board.startGame()
     }
     
     @IBAction func back() {

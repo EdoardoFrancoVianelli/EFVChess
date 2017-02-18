@@ -23,16 +23,13 @@ class UIBoard : UIView, ChessBoardProtocol, UIChessPieceProtocol{
     
     internal func pieceRemoved(piece: ChessPiece) {
         pieces["\(piece.x)\(piece.y)"]?.removeFromSuperview()
+        pieces.removeValue(forKey: "\(piece.x)\(piece.y)")
     }
-
     
-    
-    var game : Game{
-        return self.model.currentGame
-    }
+    var game : Game = Game(p1: Player(name:"", id:1), p2: Player(name: "", id: 2))
     
     private var pieces = Dictionary<String, UIChessPiece>()
-    private var model : ChessBoard = ChessBoard(player1Name: "",player2Name: "")
+    
     private var tiles = [Tile]()
     private var selectedPiece : ChessPiece?{
         didSet{
@@ -49,8 +46,12 @@ class UIBoard : UIView, ChessBoardProtocol, UIChessPieceProtocol{
         initialize()
     }
     
+    func startGame(){
+        game.startGame()
+    }
+    
     private func addPiece(piece : ChessPiece){
-        model.addPiece(piece: piece)
+        game.addPiece(piece: piece)
     }
     
     override var bounds: CGRect{
@@ -77,17 +78,17 @@ class UIBoard : UIView, ChessBoardProtocol, UIChessPieceProtocol{
             //convert screen x and y to coordinate x and y
             let new_x = Int(tapLocation.x / (self.frame.size.width / 8))
             let new_y = Int(tapLocation.y / (self.frame.size.height / 8))
-            self.model.changePiecePosition(piece: selected, newPosition: (new_x, new_y))
+            self.game.changePiecePosition(piece: selected, newPosition: (new_x, new_y))
         }
     }
     
     //board is 8x8
     
     func initialize(){
-        self.model.delegate = self
+        self.game.boardDelegate = self
         self.drawLines()
         self.initTapGesture()
-        self.model.startGame()
+        self.game.startGame()
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -219,7 +220,7 @@ class UIBoard : UIView, ChessBoardProtocol, UIChessPieceProtocol{
     
     internal func pieceSelected(piece: ChessPiece) {
         if let selected = self.selectedPiece{
-            if !self.model.consumePiece(piece1: selected, piece2: piece){
+            if !self.game.consumePiece(piece1: selected, piece2: piece){
                 self.selectedPiece = piece
             }else{
                 self.selectedPiece = nil

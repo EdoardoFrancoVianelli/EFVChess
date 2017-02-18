@@ -173,7 +173,7 @@ class Pawn : ChessPiece{
         }
     }
     
-    override init(x: Int, y: Int, movement : Movement, player : Player) {
+    init(x: Int, y: Int, movement : PawnMovement, player : Player) {
         super.init(x: x, y: y, movement: movement, player: player)
     }
 }
