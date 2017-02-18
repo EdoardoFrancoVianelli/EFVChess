@@ -151,6 +151,8 @@ class Game{
         
         return true
     }
+    
+    //MARK: Game initialization code
 
     func startGame(){
         self.board.removeAllPieces()

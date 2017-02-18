@@ -206,6 +206,10 @@ class ChessBoard : ChessPieceProtocol {
         return oldPosition.y - newPosition.y == 0 && newPosition.x != oldPosition.x
     }
     
+    private func validKnightMovement(piece : ChessPiece, newPosition : (x : Int, y : Int)) -> Bool{
+        return (abs(piece.x - newPosition.x) == 2 && abs(piece.y - newPosition.y) == 1) || (abs(piece.y - newPosition.y) == 2 && abs(piece.x - newPosition.x) == 1)
+    }
+    
     private func changeAllowed(piece : ChessPiece, newPosition : (x : Int, y : Int), inclusive : Bool) -> Bool{
         
         //check based on the allowable movements
@@ -219,59 +223,39 @@ class ChessBoard : ChessPieceProtocol {
             y_inc = 0
         }
         
-        let diagonal = diagonalMovement(piece.origin, newPosition)
-        let vertical = verticalMovement(piece.origin, newPosition)
-        let sideways = sidewaysMovement(piece.origin, newPosition)
-        
         let end = !inclusive ? newPosition : (newPosition.x + x_inc, newPosition.y + y_inc)
         
         let interference = CheckBetween(startLocation: (piece.x, piece.y), endLocation: end, increments: (x_inc, y_inc))
         var allowed = false
         
-        if diagonal && !(piece is Knight){ //diagonal
+        if diagonalMovement(piece.origin, newPosition) && !(piece is Knight){ //diagonal
             allowed = piece.allowedMovement.canMoveDirectlyDiagonally && !interference
             if piece is King{
-                allowed = allowed && abs(newPosition.x - piece.x) == 1
+                return allowed && abs(newPosition.x - piece.x) == 1
             }
-        }else if vertical{ //going straight up or down
+        }else if verticalMovement(piece.origin, newPosition){ //going straight up or down
             let diff = piece.y - newPosition.y
             if (piece is Pawn){
-                let movement_allowed = (piece.allowedMovement.canMoveDirectlyForward && abs(diff) <= piece.allowedMovement.forward && !interference)
-                return movement_allowed
+                return (piece.allowedMovement.canMoveDirectlyForward && abs(diff) <= piece.allowedMovement.forward && !interference)
             }else{
                 if diff < 0{ //going backwards
-                    allowed = piece.allowedMovement.canMoveDirectlyBackwards && abs(diff) <= piece.allowedMovement.backwards && !interference
+                    return piece.allowedMovement.canMoveDirectlyBackwards && abs(diff) <= piece.allowedMovement.backwards && !interference
                 }
                 else{
-                    allowed = piece.allowedMovement.canMoveDirectlyForward   && abs(diff) <= piece.allowedMovement.forward   && !interference
+                    return piece.allowedMovement.canMoveDirectlyForward   && abs(diff) <= piece.allowedMovement.forward   && !interference
                 }
             }
-        }else if sideways { //going straight left or right
+        }else if sidewaysMovement(piece.origin, newPosition) { //going straight left or right
         
             let diff = piece.x - newPosition.x
             
             if diff < 0{ //going left
-                allowed = piece.allowedMovement.canMoveDirectlyLeft && abs(diff) <= piece.allowedMovement.left && !interference
+                return piece.allowedMovement.canMoveDirectlyLeft && abs(diff) <= piece.allowedMovement.left && !interference
             }else{ //going right
-                allowed = piece.allowedMovement.canMoveDirectlyRight && abs(diff) <= piece.allowedMovement.right && !interference
+                return piece.allowedMovement.canMoveDirectlyRight && abs(diff) <= piece.allowedMovement.right && !interference
             }
-        }else { //knight movement
-            if abs(piece.x - newPosition.x) == 2{
-                if abs(piece.y - newPosition.y) == 1{
-                    allowed = piece is Knight
-                }
-            }else if abs(piece.y - newPosition.y) == 2{
-                if abs(piece.x - newPosition.x) == 1{
-                    allowed = piece is Knight
-                }
-            }
-            if let currentPiece = board["\(newPosition.x)\(newPosition.y)"]{
-                if currentPiece.player != piece.player{
-                    allowed = allowed && true
-                }
-            }else{
-                allowed = allowed && true
-            }
+        }else if validKnightMovement(piece: piece, newPosition: newPosition){ //knight movement
+            return piece is Knight
         }
         
         return allowed
