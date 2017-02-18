@@ -20,19 +20,11 @@ class ChessStatusBox: UIView {
         }
     }
     
-    var timerPaused : Bool = false{
+    var secondsPassed = 0{
         didSet{
-            if timerPaused{
-                timer.invalidate()
-            }else{
-                initTimer()
-            }
+            updateTitle()
         }
     }
-    
-    var timer = Timer()
-    
-    private var secondsPassed = 0
     
     override var frame: CGRect{
         didSet{
@@ -46,6 +38,25 @@ class ChessStatusBox: UIView {
         }
     }
     
+    var glow : Bool = false{
+        didSet{
+            self.SetGlow(glow: glow)
+        }
+    }
+    
+    func SetGlow(glow : Bool){
+        //https://www.hackingwithswift.com/example-code/uikit/how-to-add-a-shadow-to-a-uiview for the glow code
+        self.layer.shadowColor = UIColor.white.cgColor
+        self.layer.shadowOffset = CGSize.zero
+        if glow {
+            self.layer.shadowOpacity = 1
+            self.layer.shadowRadius = 10
+        }else{
+            self.layer.shadowOpacity = 0
+            self.layer.shadowRadius = 0
+        }
+    }
+    
     private var imageDisplayer : UIImageView
     private var pieceLabel : UILabel
     
@@ -53,6 +64,16 @@ class ChessStatusBox: UIView {
         didSet{
             imageDisplayer.image = image
         }
+    }
+    
+    var piece : ChessPiece = ChessPiece(x: 0, y: 0, movement: PawnMovement(), player: Player(name: "", id: 0)){
+        didSet{
+            updateTitle()
+        }
+    }
+    
+    private func updateTitle(){
+        self.title = self.piece.name + "\n" + self.timeText()
     }
     
     var title : String?{
@@ -96,29 +117,21 @@ class ChessStatusBox: UIView {
         self.backgroundColor = UIColor.lightGray
     }
     
-    private func initTimer(){
-        timer = Timer(timeInterval: 1.0, repeats: true, block: updateLabel)
-        DispatchQueue.main.async {
-            RunLoop.current.add(self.timer, forMode: .commonModes)
-        }
-    }
-    
-    func updateLabel(timer : Timer){
+    private func timeText() -> String{
         let formatter = NumberFormatter()
         formatter.minimumIntegerDigits = 2
-        secondsPassed += 1
         if let minutes = formatter.string(from: NSNumber(value: secondsPassed / 60)){
             if let seconds = formatter.string(from: NSNumber(value: secondsPassed % 60)){
-                title = "Pawn" + "\n" + "\(minutes):\(seconds)"
+                return "\(minutes):\(seconds)"
             }
         }
+        return ""
     }
     
     func initialize(){
         initImage()
         initLabel()
         initAspect()
-        initTimer()
     }
     
     required init?(coder aDecoder: NSCoder) {

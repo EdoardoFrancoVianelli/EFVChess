@@ -32,16 +32,31 @@ class ViewController: UIViewController, GameProtocol {
             }else{
                 statusLabel.textAlignment = .right
             }
+            player1Box.glow = currentPlayer.id == 1
+            player2Box.glow = currentPlayer.id == 2
         }
     }
     
-    var selectedPiece : ChessPiece? = ChessPiece(x: 0, y: 0, movement: PawnMovement(), player: Player(name: "", id: 1)){
+    override func viewWillDisappear(_ animated: Bool) {
+        self.navigationController?.setNavigationBarHidden(false, animated: true)
+    }
+    
+    @IBAction func newGame() {
+    }
+    
+    @IBAction func back() {
+        let _ = self.navigationController?.popViewController(animated: true)
+    }
+    
+    var selectedPiece : ChessPiece = ChessPiece(x: 0, y: 0, movement: PawnMovement(), player: Player(name: "", id: 1)){
         didSet{
-            if (self.currentPlayer.id == 1 && selectedPiece?.player.id == 1){
-                player1Box.image = imageForPiece(piece: selectedPiece!)!
+            if (self.currentPlayer.id == 1 && selectedPiece.player.id == 1){
+                player1Box.piece = selectedPiece
+                player1Box.image = imageForPiece(piece: selectedPiece)!
                 player1Box.setWhite()
-            }else if (self.currentPlayer.id == 2 && selectedPiece?.player.id == 2){
-                player2Box.image = imageForPiece(piece: selectedPiece!)!
+            }else if (self.currentPlayer.id == 2 && selectedPiece.player.id == 2){
+                player2Box.piece = selectedPiece
+                player2Box.image = imageForPiece(piece: selectedPiece)!
             }
         }
     }
@@ -52,7 +67,17 @@ class ViewController: UIViewController, GameProtocol {
         self.board.game.delegate = self
         self.currentPlayer = Player(name: firstPlayerName, id: 1)
         self.board.game.setPlayerNames(p1: firstPlayerName, p2: secondPlayerName)
+        let timer = Timer(timeInterval: 1.0, repeats: true, block: timeTicked)
+        RunLoop.current.add(timer, forMode: .defaultRunLoopMode)
         // Do any additional setup after loading the view, typically from a nib.
+    }
+    
+    func timeTicked(timer : Timer){
+        if currentPlayer.id == 1{
+            player1Box.secondsPassed += 1
+        }else{
+            player2Box.secondsPassed += 1
+        }
     }
 
     override func didReceiveMemoryWarning() {
@@ -62,8 +87,6 @@ class ViewController: UIViewController, GameProtocol {
     
     func didSwitchTurn(player: Player) {
         self.currentPlayer = player
-        player1Box.timerPaused = self.currentPlayer.id != 1
-        player2Box.timerPaused = !player1Box.timerPaused
     }
     
     func pieceSelected(piece: ChessPiece) {
@@ -71,7 +94,7 @@ class ViewController: UIViewController, GameProtocol {
     }
     
     func pieceDeselected() {
-        self.selectedPiece = nil
+        //self.selectedPiece = nil
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {

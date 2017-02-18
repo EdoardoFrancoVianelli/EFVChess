@@ -153,52 +153,65 @@
                                     <constraint firstAttribute="width" secondItem="Ws0-oN-g9Q" secondAttribute="height" multiplier="1:1" id="VgE-80-O1S"/>
                                 </constraints>
                             </view>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumFontSize="9" translatesAutoresizingMaskIntoConstraints="NO" id="djg-MW-t3C">
-                                <rect key="frame" x="26" y="531" width="323" height="17"/>
-                                <string key="text">Player 1's turn
-</string>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Player 1's turn" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumFontSize="9" translatesAutoresizingMaskIntoConstraints="NO" id="djg-MW-t3C">
+                                <rect key="frame" x="26" y="531" width="323" height="21.5"/>
                                 <fontDescription key="fontDescription" name="Chalkduster" family="Chalkduster" pointSize="17"/>
                                 <color key="textColor" red="1" green="1" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="O6G-Oj-rhl" customClass="ChessStatusBox" customModule="Chess" customModuleProvider="target">
-                                <rect key="frame" x="16" y="568" width="131.5" height="79"/>
+                                <rect key="frame" x="16" y="582.5" width="151.5" height="20.5"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                                <constraints>
-                                    <constraint firstAttribute="width" secondItem="O6G-Oj-rhl" secondAttribute="height" multiplier="5:3" id="EiM-WL-oNi"/>
-                                </constraints>
                                 <userDefinedRuntimeAttributes>
                                     <userDefinedRuntimeAttribute type="boolean" keyPath="white" value="YES"/>
                                 </userDefinedRuntimeAttributes>
                             </view>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="z4U-ib-WNJ" customClass="ChessStatusBox" customModule="Chess" customModuleProvider="target">
-                                <rect key="frame" x="227.5" y="568" width="131.5" height="79"/>
+                                <rect key="frame" x="207.5" y="582.5" width="151.5" height="20.5"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                                <constraints>
-                                    <constraint firstAttribute="width" secondItem="z4U-ib-WNJ" secondAttribute="height" multiplier="5:3" id="Mbz-n9-NmC"/>
-                                </constraints>
                             </view>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Chess" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumFontSize="25" translatesAutoresizingMaskIntoConstraints="NO" id="Q4u-Ov-tdr">
-                                <rect key="frame" x="87" y="20" width="200" height="100"/>
-                                <fontDescription key="fontDescription" name="Chalkduster" family="Chalkduster" pointSize="75"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Chess" textAlignment="justified" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumFontSize="25" translatesAutoresizingMaskIntoConstraints="NO" id="Q4u-Ov-tdr">
+                                <rect key="frame" x="183" y="45" width="187" height="76"/>
+                                <fontDescription key="fontDescription" name="Chalkduster" family="Chalkduster" pointSize="60"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ITU-Cc-mzN">
+                                <rect key="frame" x="20" y="19" width="41" height="31"/>
+                                <fontDescription key="fontDescription" name="Chalkduster" family="Chalkduster" pointSize="15"/>
+                                <state key="normal" title="Back"/>
+                                <connections>
+                                    <action selector="back" destination="BYZ-38-t0r" eventType="touchUpInside" id="p6s-OQ-Eq6"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="6wR-1J-Hie">
+                                <rect key="frame" x="20" y="60" width="91" height="31"/>
+                                <fontDescription key="fontDescription" name="Chalkduster" family="Chalkduster" pointSize="15"/>
+                                <state key="normal" title="New Game"/>
+                                <connections>
+                                    <action selector="newGame" destination="BYZ-38-t0r" eventType="touchUpInside" id="adI-B9-azt"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                         <constraints>
+                            <constraint firstItem="MGb-A0-y9L" firstAttribute="top" secondItem="ITU-Cc-mzN" secondAttribute="bottom" constant="-50.5" id="31Z-0C-JhE"/>
                             <constraint firstItem="Ws0-oN-g9Q" firstAttribute="top" secondItem="Q4u-Ov-tdr" secondAttribute="bottom" constant="25" id="8y2-Eg-fX7"/>
-                            <constraint firstAttribute="trailingMargin" secondItem="Q4u-Ov-tdr" secondAttribute="trailing" constant="50" id="9kQ-RY-zWQ"/>
                             <constraint firstItem="djg-MW-t3C" firstAttribute="top" secondItem="Ws0-oN-g9Q" secondAttribute="bottom" constant="10" id="Du1-0X-uWw"/>
                             <constraint firstItem="Ws0-oN-g9Q" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="J3z-Zv-7nT"/>
                             <constraint firstItem="Ws0-oN-g9Q" firstAttribute="centerY" secondItem="8bC-Xf-vdC" secondAttribute="centerY" id="JuU-1a-Nq7"/>
                             <constraint firstItem="Ws0-oN-g9Q" firstAttribute="width" secondItem="8bC-Xf-vdC" secondAttribute="width" id="QKl-Jb-pKX"/>
-                            <constraint firstItem="O6G-Oj-rhl" firstAttribute="top" secondItem="djg-MW-t3C" secondAttribute="bottom" constant="20" id="SLE-WL-wM2"/>
+                            <constraint firstItem="O6G-Oj-rhl" firstAttribute="top" secondItem="djg-MW-t3C" secondAttribute="bottom" constant="30" id="SLE-WL-wM2"/>
+                            <constraint firstItem="ITU-Cc-mzN" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="20" id="T79-9k-Z17"/>
                             <constraint firstItem="z4U-ib-WNJ" firstAttribute="trailing" secondItem="8bC-Xf-vdC" secondAttribute="trailingMargin" id="TB7-bU-pm3"/>
+                            <constraint firstItem="6wR-1J-Hie" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="20" id="UWr-DN-5VH"/>
                             <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="z4U-ib-WNJ" secondAttribute="bottom" constant="20" id="Ujr-0N-znS"/>
-                            <constraint firstItem="Q4u-Ov-tdr" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" constant="50" id="WEe-of-Jpy"/>
-                            <constraint firstItem="z4U-ib-WNJ" firstAttribute="top" secondItem="djg-MW-t3C" secondAttribute="bottom" constant="20" id="XL8-y8-cWz"/>
+                            <constraint firstItem="6wR-1J-Hie" firstAttribute="top" secondItem="ITU-Cc-mzN" secondAttribute="bottom" constant="10" id="V50-ka-5WR"/>
+                            <constraint firstItem="z4U-ib-WNJ" firstAttribute="top" secondItem="djg-MW-t3C" secondAttribute="bottom" constant="30" id="XL8-y8-cWz"/>
+                            <constraint firstItem="z4U-ib-WNJ" firstAttribute="width" secondItem="O6G-Oj-rhl" secondAttribute="width" id="Zdm-lS-s9a"/>
+                            <constraint firstItem="z4U-ib-WNJ" firstAttribute="height" secondItem="O6G-Oj-rhl" secondAttribute="height" id="cWE-Gc-SMn"/>
                             <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="O6G-Oj-rhl" secondAttribute="bottom" constant="20" id="hth-aj-CXu"/>
+                            <constraint firstAttribute="trailing" secondItem="Q4u-Ov-tdr" secondAttribute="trailing" constant="5" id="iXV-VD-5FA"/>
                             <constraint firstItem="MGb-A0-y9L" firstAttribute="width" secondItem="8bC-Xf-vdC" secondAttribute="width" id="j8m-B1-DOC"/>
                             <constraint firstItem="MGb-A0-y9L" firstAttribute="height" secondItem="8bC-Xf-vdC" secondAttribute="height" id="kOE-uN-mhq"/>
                             <constraint firstItem="O6G-Oj-rhl" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" id="lcj-z5-MXn"/>
@@ -206,7 +219,7 @@
                             <constraint firstItem="MGb-A0-y9L" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="sh0-eh-3aT"/>
                             <constraint firstAttribute="trailingMargin" secondItem="djg-MW-t3C" secondAttribute="trailing" constant="10" id="snB-WL-ag8"/>
                             <constraint firstItem="djg-MW-t3C" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" constant="10" id="v4e-d4-DcG"/>
-                            <constraint firstItem="z4U-ib-WNJ" firstAttribute="leading" secondItem="O6G-Oj-rhl" secondAttribute="trailing" constant="80" id="y7h-0J-f8a"/>
+                            <constraint firstItem="z4U-ib-WNJ" firstAttribute="leading" secondItem="O6G-Oj-rhl" secondAttribute="trailing" constant="40" id="y7h-0J-f8a"/>
                         </constraints>
                     </view>
                     <toolbarItems>
@@ -214,7 +227,7 @@
                     </toolbarItems>
                     <nil key="simulatedStatusBarMetrics"/>
                     <nil key="simulatedTopBarMetrics"/>
-                    <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>
+                    <nil key="simulatedBottomBarMetrics"/>
                     <connections>
                         <outlet property="board" destination="Ws0-oN-g9Q" id="DZM-w4-XKd"/>
                         <outlet property="player1Box" destination="O6G-Oj-rhl" id="ZUe-av-6QC"/>
