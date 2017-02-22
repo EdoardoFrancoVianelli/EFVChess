@@ -11,7 +11,6 @@ import UIKit
 
 protocol UIChessPieceProtocol{
     func pieceSelected(piece : ChessPiece)
-    func pieceDeselected(piece : ChessPiece)
 }
 
 func imageForPiece(piece : ChessPiece) -> UIImage?{
@@ -57,8 +56,6 @@ class UIChessPiece : UIView{
             self.selected = newValue
             if Selected{
                 delegate?.pieceSelected(piece: self.piece)
-            }else{
-                delegate?.pieceDeselected(piece: self.piece)
             }
         }
     }
@@ -103,13 +100,8 @@ class UIChessPiece : UIView{
     }
     
     func pieceTapped(gesture : UITapGestureRecognizer){
-        self.selected = !self.selected
-        print("Selected = \(self.selected)")
-        if self.selected{
-            self.delegate?.pieceSelected(piece: self.piece)
-        }else{
-            self.delegate?.pieceDeselected(piece: self.piece)
-        }
+        self.selected = true
+        self.delegate?.pieceSelected(piece: self.piece)
     }
     
     private func updateImageFrame(){

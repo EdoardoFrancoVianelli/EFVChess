@@ -11,7 +11,6 @@ import Foundation
 protocol GameProtocol {
     func didSwitchTurn(player : Player)
     func pieceSelected(piece : ChessPiece)
-    func pieceDeselected()
 }
 
 class Game{
@@ -74,17 +73,31 @@ class Game{
         return currentTurn == _player1
     }
     
-    func switchTurns(){
+    func switchTurns(moved : ChessPiece, oldPosition : (x : Int, y : Int)){
+        
         if currentTurn == _player1{
+            
+            if let _ = board.player1Check{
+                moved.origin = oldPosition
+                print("You are still in check")
+                return
+            }
+            
             self.currentTurn = _player2
+            
         }else{
+            
+            if let _ = board.player2Check{
+                moved.origin = oldPosition
+                print("You are still in check")
+                return
+            }
+            
             self.currentTurn = _player1
+            
         }
+        
         delegate?.didSwitchTurn(player: currentPlayer)
-    }
-    
-    func pieceDeselected(){
-        delegate?.pieceDeselected()
     }
     
     func pieceSelected(piece : ChessPiece){
@@ -96,7 +109,6 @@ class Game{
             player1removed.append(piece)
         }else if piece.player == _player2{
             player2removed.append(piece)
-            
         }
     }
     
@@ -106,7 +118,7 @@ class Game{
     }
     
     func changePiecePosition(piece: ChessPiece, newPosition : (x : Int, y : Int)){
-        
+        let oldPosition = piece.origin
         if piece.player != currentPlayer{
             return
         }
@@ -123,13 +135,13 @@ class Game{
             }
             
             piece.origin = (newPosition.x, newPosition.y)
-            self.switchTurns()
+            self.switchTurns(moved: piece, oldPosition: oldPosition)
         }else{
             if let pawn = piece as? Pawn{
                 if !(pawn.allowedMovement as! PawnMovement).movedTwo && abs(diff) == 2 && piece.player == currentPlayer{
                     (piece.allowedMovement as! PawnMovement).movedTwo = true
                     pawn.origin = newPosition
-                    self.switchTurns()
+                    self.switchTurns(moved: piece, oldPosition: oldPosition)
                 }
             }
         }
@@ -140,13 +152,14 @@ class Game{
     }
     
     func consumePiece(piece1 : ChessPiece, piece2 : ChessPiece) -> Bool{
+        let oldPosition = piece1.origin
         if piece1.player == piece2.player || currentPlayer != piece1.player{
             return false
         }
         
         if self.board.consumePiece(piece1: piece1, piece2: piece2){
             pieceRemoved(piece: piece2)
-            switchTurns()
+            switchTurns(moved: piece1, oldPosition: oldPosition)
         }
         
         return true

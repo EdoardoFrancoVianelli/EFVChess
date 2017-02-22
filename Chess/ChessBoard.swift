@@ -16,11 +16,32 @@ protocol ChessBoardProtocol {
 
 class ChessBoard : ChessPieceProtocol {
     
-    private var board = Dictionary<String, ChessPiece>()
+    var player1Check : ChessPiece?{
+        return p1Check
+    }
+    
+    var player2Check : ChessPiece?{
+        return p2Check
+    }
+    
+    private var p1Check : ChessPiece?
+    private var p2Check : ChessPiece?
+    
+    private var player1King : King
+    private var player2King : King
+    private var board : Dictionary<String, ChessPiece>
+
     var delegate : ChessBoardProtocol?
+    
+    var pieces : Dictionary<String, ChessPiece> {
+        return board
+    }
+    
     
     init(player1Name : String, player2Name : String){
         self.board = Dictionary<String, ChessPiece>()
+        self.player1King = King(x: 0, y: 0, movement: KingMovement(), player: Player(name: "", id: 1))
+        self.player2King = King(x: 0, y: 0, movement: KingMovement(), player: Player(name: "", id: 2))
     }
     
     private func pieceCanEat(piece : ChessPiece, other : ChessPiece) -> Bool{
@@ -37,55 +58,41 @@ class ChessBoard : ChessPieceProtocol {
         return allowed && can_move
     }
     
-    private func pieceVulnerable(piece : ChessPiece) -> Bool{
+    private func pieceVulnerable(piece : ChessPiece) -> ChessPiece?{
+        
+        let left_r_up_d = ["Left", "Right", "Up", "Down"]
+        let lr_ud_increments  : [(x : Int, y : Int)] = [(1,0), (0,1)]
         
         //check left and right
         
         print(piece)
         
-        print("Left and Right")
-        
-        for i in 0..<8{
-            if i == piece.x{
-                continue
-            }
-            print("\(i),\(piece.y)")
-            if let currentPiece = self.board["\(i)\(piece.y)"]{
-                
-                //check if the current piece can consume the other piece
-                
-                let diff = abs(i - piece.x)
-                
-                print("Found \(currentPiece)")
-                
-                if ((diff > 1) && (piece is Rook) || (piece is Queen)) || (diff == 1 && piece is King){
-                    return true
+        for (index,increment) in lr_ud_increments.enumerated(){
+            var x = piece.x
+            var y = piece.y
+            print(left_r_up_d[index])
+            for i in 0..<8{
+                x += increment.x
+                y += increment.y
+                if (i == piece.x && index == 0) || (i == piece.y && index == 0){
+                    continue
                 }
-                
-                break;
-            }
-        }
-        
-        //check up and down
-        
-        print("Up and Down")
-        
-        for i in 0..<8{
-            if i == piece.y{
-                continue
-            }
-            print("\(piece.x),\(i)")
-            if let currentPiece = self.board["\(piece.x)\(i)"]{
-                
-                print("Found \(currentPiece)")
-                
-                let diff = abs(i - piece.y)
-                
-                if ((diff > 1) && (piece is Rook) || (piece is Queen)) || (diff == 1 && piece is King){
-                    return true
+                print("\(x),\(y)")
+                if let currentPiece = self.board["\(x)\(y)"]{
+                    
+                    //check if the current piece can consume the other piece
+                    
+                    let diff = abs(i - ((index == 0) ? piece.x : piece.y))
+                    
+                    if ((diff > 1) && (currentPiece is Rook) || (currentPiece is Queen)) || (diff == 1 && currentPiece is King){
+                        if currentPiece.player == piece.player{
+                            break
+                        }
+                        return currentPiece
+                    }
+                    
+                    break;
                 }
-                
-                break;
             }
         }
         
@@ -99,23 +106,15 @@ class ChessBoard : ChessPieceProtocol {
             print(diagonal_descr[i])
             while current.x >= 0 && current.x < 8 && current.y >= 0 && current.y < 8{
                 if let currentPiece = self.board["\(current.x)\(current.y)"]{
-                    
-                    print("Found \(currentPiece)")
-                    
+                                        
                     let y_diff = currentPiece.y - piece.y //if y is greater than 0, is is below, otherwise it is abow
                     let diff = abs(current.x - piece.x)
                     
-                    if ((diff > 1) && (piece is Bishop) || (piece is Queen)) || (diff == 1 && (piece is King || piece is Pawn)){
-                        
-                        if (piece is Pawn){
-                            if y_diff > 0 && currentPiece.player.id == 1{
-                                break
-                            }else if y_diff < 0 && currentPiece.player.id == 2{
-                                break
-                            }
+                    if (currentPiece is Bishop || currentPiece is Queen) || currentPiece is Pawn && diff == 1 && y_diff == 1{
+                        if currentPiece.player == piece.player{
+                            break
                         }
-                        
-                        return true
+                        return currentPiece
                     }
                     
                     break;
@@ -126,7 +125,7 @@ class ChessBoard : ChessPieceProtocol {
             }
         }
         
-        return false
+        return nil
     }
     
     func consumePiece(piece1 : ChessPiece, piece2 : ChessPiece) -> Bool{
@@ -280,20 +279,34 @@ class ChessBoard : ChessPieceProtocol {
     
     func positionDidChange(piece: ChessPiece, oldPosition : (x : Int, y : Int)) {
         
-        DispatchQueue.main.async {
-            if (self.pieceVulnerable(piece: piece)){
-                print("Piece is not safe in this position")
-            }else{
-                print("Piece is safe in this position")
-            }
-        }
-        
         self.board.removeValue(forKey: "\(oldPosition.x)\(oldPosition.y)")
         self.board["\(piece.x)\(piece.y)"] = piece
         delegate?.pieceDidChangePosition(piece: piece, oldPosition: oldPosition)
+        
+        p1Check = nil
+        p2Check = nil
+        
+        if let att_piece = self.pieceVulnerable(piece: self.player1King){
+            print("\(self.player1King) is not safe in this position, can be attacked by \(att_piece)")
+            p1Check = att_piece
+        }
+        
+        if let att_piece = self.pieceVulnerable(piece: self.player2King){
+            print("\(self.player2King) is not safe in this position, can be attacked by \(att_piece)")
+            p2Check = att_piece
+        }
     }
     
     func addPiece(piece : ChessPiece){
+        
+        if let king = piece as? King{
+            if piece.player.id == 1{
+                player1King = king
+            }else{
+                player2King = king
+            }
+        }
+        
         self.board["\(piece.x)\(piece.y)"] = piece
         piece.delegate = self
         self.delegate?.pieceAdded(piece: piece)

@@ -35,8 +35,6 @@ class UIBoard : UIView, ChessBoardProtocol, UIChessPieceProtocol{
         didSet{
             if let piece = selectedPiece{
                 self.game.pieceSelected(piece: piece)
-            }else{
-                self.game.pieceDeselected()
             }
         }
     }
@@ -48,10 +46,6 @@ class UIBoard : UIView, ChessBoardProtocol, UIChessPieceProtocol{
     
     func startGame(){
         game.startGame()
-    }
-    
-    private func addPiece(piece : ChessPiece){
-        game.addPiece(piece: piece)
     }
     
     override var bounds: CGRect{
@@ -78,7 +72,9 @@ class UIBoard : UIView, ChessBoardProtocol, UIChessPieceProtocol{
             //convert screen x and y to coordinate x and y
             let new_x = Int(tapLocation.x / (self.frame.size.width / 8))
             let new_y = Int(tapLocation.y / (self.frame.size.height / 8))
-            self.game.changePiecePosition(piece: selected, newPosition: (new_x, new_y))
+            DispatchQueue.main.async {
+                self.game.changePiecePosition(piece: selected, newPosition: (new_x, new_y))
+            }
         }
     }
     
@@ -228,10 +224,6 @@ class UIBoard : UIView, ChessBoardProtocol, UIChessPieceProtocol{
         }else{
             self.selectedPiece = piece
         }
-    }
-    
-    internal func pieceDeselected(piece: ChessPiece) {
-        self.selectedPiece = nil
     }
 }
 

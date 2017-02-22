@@ -71,56 +71,67 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="Player 1" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="BOu-WN-FBU">
-                                <rect key="frame" x="16" y="101" width="343" height="30"/>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="wood-texture.jpg" translatesAutoresizingMaskIntoConstraints="NO" id="JCR-Z1-LAa">
+                                <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                            </imageView>
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="Player 1" borderStyle="roundedRect" textAlignment="center" minimumFontSize="17" clearButtonMode="always" translatesAutoresizingMaskIntoConstraints="NO" id="BOu-WN-FBU">
+                                <rect key="frame" x="16" y="57.5" width="343" height="30"/>
                                 <nil key="textColor"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <fontDescription key="fontDescription" name="Chalkduster" family="Chalkduster" pointSize="17"/>
                                 <textInputTraits key="textInputTraits"/>
                             </textField>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Player 2 Name" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="RYH-hQ-Xkp">
-                                <rect key="frame" x="16" y="139" width="343" height="21"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                <nil key="textColor"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Player 2 Name" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="RYH-hQ-Xkp">
+                                <rect key="frame" x="16" y="95.5" width="343" height="21.5"/>
+                                <fontDescription key="fontDescription" name="Chalkduster" family="Chalkduster" pointSize="17"/>
+                                <color key="textColor" red="1" green="1" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Player 1 Name" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="6aO-69-7Of">
-                                <rect key="frame" x="16" y="72" width="343" height="21"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                <nil key="textColor"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Player 1 Name" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="6aO-69-7Of">
+                                <rect key="frame" x="16" y="28" width="343" height="21.5"/>
+                                <fontDescription key="fontDescription" name="Chalkduster" family="Chalkduster" pointSize="17"/>
+                                <color key="textColor" red="1" green="1" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="Player 2" borderStyle="roundedRect" textAlignment="center" minimumFontSize="17" clearButtonMode="always" translatesAutoresizingMaskIntoConstraints="NO" id="sMb-cS-a3K">
+                                <rect key="frame" x="16" y="125" width="343" height="30"/>
+                                <nil key="textColor"/>
+                                <fontDescription key="fontDescription" name="Chalkduster" family="Chalkduster" pointSize="17"/>
+                                <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no"/>
+                            </textField>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="efR-Ab-lXY">
-                                <rect key="frame" x="171" y="318.5" width="33" height="30"/>
-                                <state key="normal" title="Play!"/>
+                                <rect key="frame" x="145" y="163" width="84" height="50"/>
+                                <fontDescription key="fontDescription" name="Chalkduster" family="Chalkduster" pointSize="30"/>
+                                <state key="normal" title="Play!">
+                                    <color key="titleColor" red="0.0" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                </state>
                                 <connections>
                                     <segue destination="BYZ-38-t0r" kind="show" identifier="gameTransitionSegue" id="SrJ-As-UGo"/>
                                 </connections>
                             </button>
-                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="Player 2" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="sMb-cS-a3K">
-                                <rect key="frame" x="16" y="168" width="343" height="30"/>
-                                <nil key="textColor"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                <textInputTraits key="textInputTraits"/>
-                            </textField>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstItem="BOu-WN-FBU" firstAttribute="trailing" secondItem="hta-OR-f57" secondAttribute="trailingMargin" id="3RM-m2-vPH"/>
                             <constraint firstItem="RYH-hQ-Xkp" firstAttribute="leading" secondItem="hta-OR-f57" secondAttribute="leadingMargin" id="5Ze-Sn-Wa5"/>
+                            <constraint firstItem="efR-Ab-lXY" firstAttribute="centerX" secondItem="hta-OR-f57" secondAttribute="centerX" id="BJX-gY-ZvQ"/>
                             <constraint firstItem="6aO-69-7Of" firstAttribute="top" secondItem="5AQ-4p-xx4" secondAttribute="bottom" constant="8" id="C0z-Jh-V1Y"/>
+                            <constraint firstItem="JCR-Z1-LAa" firstAttribute="height" secondItem="hta-OR-f57" secondAttribute="height" id="E1R-SZ-Vq9"/>
+                            <constraint firstItem="efR-Ab-lXY" firstAttribute="top" secondItem="sMb-cS-a3K" secondAttribute="bottom" constant="8" id="EjO-GV-Ymz"/>
                             <constraint firstItem="6aO-69-7Of" firstAttribute="leading" secondItem="hta-OR-f57" secondAttribute="leadingMargin" id="Jfx-mM-bf0"/>
                             <constraint firstItem="RYH-hQ-Xkp" firstAttribute="trailing" secondItem="hta-OR-f57" secondAttribute="trailingMargin" id="M36-mM-MV9"/>
                             <constraint firstItem="BOu-WN-FBU" firstAttribute="top" secondItem="6aO-69-7Of" secondAttribute="bottom" constant="8" id="SHK-Ue-1gm"/>
                             <constraint firstItem="RYH-hQ-Xkp" firstAttribute="top" secondItem="BOu-WN-FBU" secondAttribute="bottom" constant="8" id="VLo-nG-RLj"/>
+                            <constraint firstItem="JCR-Z1-LAa" firstAttribute="width" secondItem="hta-OR-f57" secondAttribute="width" id="XMt-I2-omw"/>
                             <constraint firstItem="BOu-WN-FBU" firstAttribute="leading" secondItem="hta-OR-f57" secondAttribute="leadingMargin" id="YWO-aQ-uVb"/>
+                            <constraint firstItem="JCR-Z1-LAa" firstAttribute="leading" secondItem="hta-OR-f57" secondAttribute="leading" id="bAQ-Di-uaO"/>
                             <constraint firstItem="sMb-cS-a3K" firstAttribute="top" secondItem="RYH-hQ-Xkp" secondAttribute="bottom" constant="8" id="d0i-Av-3Ki"/>
+                            <constraint firstItem="JCR-Z1-LAa" firstAttribute="top" secondItem="hta-OR-f57" secondAttribute="topMargin" id="eWr-cp-75u"/>
                             <constraint firstItem="sMb-cS-a3K" firstAttribute="leading" secondItem="hta-OR-f57" secondAttribute="leadingMargin" id="gOU-h8-r0Z"/>
-                            <constraint firstItem="efR-Ab-lXY" firstAttribute="centerX" secondItem="hta-OR-f57" secondAttribute="centerX" id="l7p-Sc-4US"/>
                             <constraint firstItem="6aO-69-7Of" firstAttribute="trailing" secondItem="hta-OR-f57" secondAttribute="trailingMargin" id="oGH-vz-JAB"/>
                             <constraint firstItem="sMb-cS-a3K" firstAttribute="trailing" secondItem="hta-OR-f57" secondAttribute="trailingMargin" id="op5-GR-4Ui"/>
-                            <constraint firstItem="efR-Ab-lXY" firstAttribute="centerY" secondItem="hta-OR-f57" secondAttribute="centerY" id="xNM-gt-JOD"/>
                         </constraints>
                     </view>
+                    <nil key="simulatedTopBarMetrics"/>
                     <connections>
                         <outlet property="player1Box" destination="BOu-WN-FBU" id="2hL-a5-aQv"/>
                         <outlet property="player2Box" destination="sMb-cS-a3K" id="VU5-b7-MLR"/>
@@ -160,14 +171,14 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="O6G-Oj-rhl" customClass="ChessStatusBox" customModule="Chess" customModuleProvider="target">
-                                <rect key="frame" x="16" y="582.5" width="151.5" height="20.5"/>
+                                <rect key="frame" x="16" y="582.5" width="151.5" height="64.5"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <userDefinedRuntimeAttributes>
                                     <userDefinedRuntimeAttribute type="boolean" keyPath="white" value="YES"/>
                                 </userDefinedRuntimeAttributes>
                             </view>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="z4U-ib-WNJ" customClass="ChessStatusBox" customModule="Chess" customModuleProvider="target">
-                                <rect key="frame" x="207.5" y="582.5" width="151.5" height="20.5"/>
+                                <rect key="frame" x="207.5" y="582.5" width="151.5" height="64.5"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                             </view>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Chess" textAlignment="justified" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumFontSize="25" translatesAutoresizingMaskIntoConstraints="NO" id="Q4u-Ov-tdr">
@@ -287,6 +298,7 @@
         <!--Navigation Controller-->
         <scene sceneID="7vC-ln-Njk">
             <objects>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="jev-Te-puV" userLabel="First Responder" sceneMemberID="firstResponder"/>
                 <navigationController automaticallyAdjustsScrollViewInsets="NO" id="HXh-pA-y0b" sceneMemberID="viewController">
                     <toolbarItems/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="qUA-PE-pG4">
@@ -298,7 +310,6 @@
                         <segue destination="o5q-6E-Ldh" kind="relationship" relationship="rootViewController" id="j2Y-vU-Fcb"/>
                     </connections>
                 </navigationController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="jev-Te-puV" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="-895.20000000000005" y="118.29085457271366"/>
         </scene>

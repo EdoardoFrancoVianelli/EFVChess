@@ -227,6 +227,7 @@ class Queen : ChessPiece{
 }
 
 class King : ChessPiece{
+        
     override var name: String{
         get{
             return "King"
