@@ -19,7 +19,7 @@ class Tile : UIBezierPath{
 
 @IBDesignable
 
-class UIBoard : UIView, ChessBoardProtocol, UIChessPieceProtocol{
+class UIBoard : UIView, ChessBoardDelegate, UIChessPieceProtocol{
     
     internal func pieceRemoved(piece: ChessPiece) {
         pieces["\(piece.x)\(piece.y)"]?.removeFromSuperview()

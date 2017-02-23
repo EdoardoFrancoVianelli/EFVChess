@@ -66,7 +66,7 @@ class ChessStatusBox: UIView {
         }
     }
     
-    var piece : ChessPiece = ChessPiece(x: 0, y: 0, movement: PawnMovement(), player: Player(name: "", id: 0)){
+    var piece : ChessPiece = Pawn(x: 0, y: 0, movement: PawnMovement(), player: Player(name: "", id: 0)){
         didSet{
             updateTitle()
         }

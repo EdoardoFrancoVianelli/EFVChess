@@ -115,14 +115,14 @@ class KingMovement : Movement{
     var right : Int{ return 1 }
 }
 
-protocol ChessPieceProtocol{
+protocol ChessPieceDelegate{
     func positionDidChange(piece : ChessPiece, oldPosition : (x : Int, y : Int))
 }
 
 class ChessPiece : CustomStringConvertible{
     
     var player : Player
-    var delegate : ChessPieceProtocol?
+    var delegate : ChessPieceDelegate?
     
     var allowedMovement : Movement
     

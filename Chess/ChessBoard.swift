@@ -8,13 +8,13 @@
 
 import Foundation
 
-protocol ChessBoardProtocol {
+protocol ChessBoardDelegate {
     func pieceDidChangePosition(piece : ChessPiece, oldPosition : (x : Int, y : Int))
     func pieceAdded(piece : ChessPiece)
     func pieceRemoved(piece : ChessPiece)
 }
 
-class ChessBoard : ChessPieceProtocol {
+class ChessBoard : ChessPieceDelegate {
     
     var player1Check : ChessPiece?{
         return p1Check
@@ -31,7 +31,7 @@ class ChessBoard : ChessPieceProtocol {
     private var player2King : King
     private var board : Dictionary<String, ChessPiece>
 
-    var delegate : ChessBoardProtocol?
+    var delegate : ChessBoardDelegate?
     
     var pieces : Dictionary<String, ChessPiece> {
         return board

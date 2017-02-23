@@ -8,9 +8,11 @@
 
 import Foundation
 
-protocol GameProtocol {
+protocol GameDelegate {
+    func playerInCheck(player : Player)
     func didSwitchTurn(player : Player)
     func pieceSelected(piece : ChessPiece)
+    func pieceDeselected()
 }
 
 class Game{
@@ -28,8 +30,8 @@ class Game{
         return player2removed
     }
     
-    var delegate : GameProtocol?
-    var boardDelegate : ChessBoardProtocol?{
+    var delegate : GameDelegate?
+    var boardDelegate : ChessBoardDelegate?{
         set{
             board.delegate = newValue
         }get{
@@ -78,8 +80,8 @@ class Game{
         if currentTurn == _player1{
             
             if let _ = board.player1Check{
+                delegate?.playerInCheck(player: _player1)
                 moved.origin = oldPosition
-                print("You are still in check")
                 return
             }
             
@@ -88,8 +90,8 @@ class Game{
         }else{
             
             if let _ = board.player2Check{
+                delegate?.playerInCheck(player: _player2)
                 moved.origin = oldPosition
-                print("You are still in check")
                 return
             }
             
@@ -98,6 +100,10 @@ class Game{
         }
         
         delegate?.didSwitchTurn(player: currentPlayer)
+    }
+    
+    func pieceDeselected(){
+        delegate?.pieceDeselected()
     }
     
     func pieceSelected(piece : ChessPiece){

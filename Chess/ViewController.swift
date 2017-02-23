@@ -10,8 +10,10 @@ import UIKit
 
 //wood texture from http://www.psdgraphics.com/file/wood-texture.jpg
 
-class ViewController: UIViewController, GameProtocol {
+class ViewController: UIViewController, GameDelegate {
 
+    var check : Player?
+    
     @IBOutlet weak var player2Box: ChessStatusBox!
     @IBOutlet weak var player1Box: ChessStatusBox!
     
@@ -24,9 +26,13 @@ class ViewController: UIViewController, GameProtocol {
     @IBOutlet weak var board: UIBoard!
     @IBOutlet weak var statusLabel: UILabel!
     
+    func updateStatusLabel(){
+        statusLabel.text = "\(currentPlayer.name)'s turn"
+    }
+    
     var currentPlayer = Player(name: "Player 1", id: 1){
         didSet{
-            statusLabel.text = "\(currentPlayer.name)'s turn"
+            updateStatusLabel()
             if currentPlayer.id == 1{
                 statusLabel.textAlignment = .left
             }else{
@@ -86,7 +92,30 @@ class ViewController: UIViewController, GameProtocol {
         // Dispose of any resources that can be recreated.
     }
     
+    internal func playerInCheck(player: Player) {
+        
+        UIView.animate(withDuration: 0.5, delay: 0.0, options: UIViewAnimationOptions.curveEaseOut, animations: {
+            
+            self.statusLabel.alpha = 0.0
+            
+        }, completion: { (completed : Bool) in
+            if completed{
+                self.statusLabel.alpha = 1.0
+            }
+        })
+        
+        statusLabel.text = "\(currentPlayer.name)'s turn"
+        self.statusLabel.text?.append(" -> in Check!")
+    }
+    
     func didSwitchTurn(player: Player) {
+        if let chk = check{
+            if chk != player{
+                check = nil
+            }else{
+                self.statusLabel.text?.append(" -> in Check!")
+            }
+        }
         self.currentPlayer = player
     }
     
