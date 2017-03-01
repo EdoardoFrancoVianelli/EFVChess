@@ -10,8 +10,9 @@ import UIKit
 
 //wood texture from http://www.psdgraphics.com/file/wood-texture.jpg
 
-class ViewController: UIViewController, GameDelegate {
+class ViewController: UIViewController, GameDelegate, SlidingMenuDelegate {
 
+    var slidingMenu: SlidingMenu?
     var check : Player?
     
     @IBOutlet weak var player2Box: ChessStatusBox!
@@ -43,11 +44,19 @@ class ViewController: UIViewController, GameDelegate {
         }
     }
     
+    func selectedIndex(i: Int, content: (text: String, subtitle: String)) {
+        if i == 0{
+            newGame()
+        }else if i == 2{
+            self.performSegue(withIdentifier: "deletedPiecesSegue", sender: self)
+        }
+    }
+    
     override func viewWillDisappear(_ animated: Bool) {
         self.navigationController?.setNavigationBarHidden(false, animated: true)
     }
     
-    @IBAction func newGame() {
+    func newGame() {
         board.startGame()
     }
     
@@ -68,9 +77,23 @@ class ViewController: UIViewController, GameDelegate {
         }
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        self.navigationController?.setNavigationBarHidden(true, animated: true)
+    }
+    
+    func configureSlideMenu(){
+        slidingMenu = SlidingMenu(sp: self.view)
+        slidingMenu?.addElement(text: "New Game", subtitle: "Start a new game", section: 0)
+        slidingMenu?.addElement(text: "End Game", subtitle: "Quit the current game", section: 0)
+        slidingMenu?.addElement(text: "Deleted pieces", subtitle: "See the game's deleted pieces", section: 0)
+        slidingMenu?.addHeader(name: "Settings")
+        slidingMenu?.addSwitch(text: "Sound", section: 1)
+        slidingMenu?.delegate = self
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.navigationController?.setNavigationBarHidden(true, animated: true)
+        self.configureSlideMenu()
         self.board.game.delegate = self
         self.currentPlayer = Player(name: firstPlayerName, id: 1)
         self.board.game.setPlayerNames(p1: firstPlayerName, p2: secondPlayerName)
@@ -121,6 +144,12 @@ class ViewController: UIViewController, GameDelegate {
     
     func pieceSelected(piece: ChessPiece) {
         self.selectedPiece = piece
+    }
+    
+    internal func gameOver(loser: Player) {
+        let controller = UIAlertController(title: "GAME OVER", message: loser.description + " lost", preferredStyle: .alert)
+        controller.addAction(UIAlertAction(title: "Ok", style: .cancel, handler: nil))
+        present(controller, animated: false, completion: nil)
     }
     
     func pieceDeselected() {

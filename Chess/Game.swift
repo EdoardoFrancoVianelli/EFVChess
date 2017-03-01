@@ -13,9 +13,16 @@ protocol GameDelegate {
     func didSwitchTurn(player : Player)
     func pieceSelected(piece : ChessPiece)
     func pieceDeselected()
+    func gameOver(loser : Player)
 }
 
 class Game{
+    
+    var gameOver : Bool = false{
+        didSet{
+            delegate?.gameOver(loser: currentPlayer)
+        }
+    }
     
     private var player1removed = [ChessPiece]()
     private var player2removed = [ChessPiece]()
@@ -75,13 +82,27 @@ class Game{
         return currentTurn == _player1
     }
     
+    private func playerInCheck(p : Player, moved : ChessPiece, oldPosition : (x : Int, y : Int)){
+        delegate?.playerInCheck(player: _player1)
+        moved.origin = oldPosition
+        return
+    }
+    
+    func verifyCheckMate(p : Player, attackingPiece : ChessPiece, attacked : ChessPiece){ //check if the current player is in checkmate
+        //checkmate if the attacking piece cannot be blocked or eaten
+        
+        if ( board.pieceVulnerable(piece: attackingPiece) == nil && board.pieceCanBeBlockedFromAttackingPiece(attacker: attackingPiece, attacked: attacked) == nil){
+            //game over
+        }
+    }
+    
     func switchTurns(moved : ChessPiece, oldPosition : (x : Int, y : Int)){
         
         if currentTurn == _player1{
             
-            if let _ = board.player1Check{
-                delegate?.playerInCheck(player: _player1)
-                moved.origin = oldPosition
+            if let attacker = board.player1Check{
+                playerInCheck(p: _player1, moved: moved, oldPosition: oldPosition)
+                verifyCheckMate(p: _player1, attackingPiece: attacker, attacked: board.firstPlayerKing)
                 return
             }
             
@@ -89,9 +110,9 @@ class Game{
             
         }else{
             
-            if let _ = board.player2Check{
-                delegate?.playerInCheck(player: _player2)
-                moved.origin = oldPosition
+            if let attacker = board.player2Check{
+                playerInCheck(p: _player1, moved: moved, oldPosition: oldPosition)
+                verifyCheckMate(p: _player2, attackingPiece: attacker, attacked: board.secondPlayerKing)
                 return
             }
             
@@ -124,6 +145,11 @@ class Game{
     }
     
     func changePiecePosition(piece: ChessPiece, newPosition : (x : Int, y : Int)){
+        
+        if gameOver{
+            print("Game is over, you can't move anything")
+        }
+        
         let oldPosition = piece.origin
         if piece.player != currentPlayer{
             return
@@ -144,7 +170,10 @@ class Game{
             self.switchTurns(moved: piece, oldPosition: oldPosition)
         }else{
             if let pawn = piece as? Pawn{
-                if !(pawn.allowedMovement as! PawnMovement).movedTwo && abs(diff) == 2 && piece.player == currentPlayer{
+                if !(pawn.allowedMovement as! PawnMovement).movedTwo &&
+                    abs(diff) == 2 &&
+                    piece.player == currentPlayer &&
+                    abs(piece.x - newPosition.x) == 0{
                     (piece.allowedMovement as! PawnMovement).movedTwo = true
                     pawn.origin = newPosition
                     self.switchTurns(moved: piece, oldPosition: oldPosition)
@@ -174,6 +203,7 @@ class Game{
     //MARK: Game initialization code
 
     func startGame(){
+        self.gameOver = false
         self.board.removeAllPieces()
         self.initPawns()
         self.initRooks()

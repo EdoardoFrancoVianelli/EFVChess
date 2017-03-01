@@ -29,6 +29,19 @@ class ChessBoard : ChessPieceDelegate {
     
     private var player1King : King
     private var player2King : King
+    
+    var firstPlayerKing : ChessPiece {
+        get{
+            return player1King
+        }
+    }
+    
+    var secondPlayerKing : ChessPiece{
+        get{
+            return player2King
+        }
+    }
+    
     private var board : Dictionary<String, ChessPiece>
 
     var delegate : ChessBoardDelegate?
@@ -58,7 +71,42 @@ class ChessBoard : ChessPieceDelegate {
         return allowed && can_move
     }
     
-    private func pieceVulnerable(piece : ChessPiece) -> ChessPiece?{
+    func pieceCanBeBlockedFromAttackingPiece(attacker : ChessPiece, attacked : ChessPiece) -> ChessPiece?{
+        
+        var x_inc = (attacked.origin.x - attacker.origin.x) > 0 ? 1 : -1
+        var y_inc = (attacked.origin.y - attacker.origin.y) > 0 ? 1 : -1
+        
+        if (attacked.origin.x - attacker.origin.x) == 0{
+            x_inc = 0
+        }else if (attacked.origin.y - attacker.origin.y) == 0{
+            y_inc = 0
+        }
+        
+        var pieces_to_check = [ChessPiece]()
+        
+        for piece in board{
+            if piece.value.player == attacked.player{
+                pieces_to_check.append(piece.value)
+            }
+        }
+        
+        var i = attacker.origin.x
+        var j = attacker.origin.y
+        
+        while i < attacked.x && j < attacked.y{
+            for piece in pieces_to_check{
+                if CheckBetween(startLocation: piece.origin, endLocation: attacked.origin, increments: (x_inc, y_inc)){
+                    return piece
+                }
+            }
+            i += x_inc
+            j += y_inc
+        }
+        
+        return nil
+    }
+    
+    func pieceVulnerable(piece : ChessPiece) -> ChessPiece?{
         
         let left_r_up_d = ["Left", "Right", "Up", "Down"]
         let lr_ud_increments  : [(x : Int, y : Int)] = [(1,0), (0,1)]

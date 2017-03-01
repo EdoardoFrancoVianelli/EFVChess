@@ -165,7 +165,7 @@
                                 </constraints>
                             </view>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Player 1's turn" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumFontSize="9" translatesAutoresizingMaskIntoConstraints="NO" id="djg-MW-t3C">
-                                <rect key="frame" x="26" y="531" width="323" height="21.5"/>
+                                <rect key="frame" x="26" y="531" width="323" height="22"/>
                                 <fontDescription key="fontDescription" name="Chalkduster" family="Chalkduster" pointSize="17"/>
                                 <color key="textColor" red="1" green="1" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
@@ -181,48 +181,29 @@
                                 <rect key="frame" x="207.5" y="582.5" width="151.5" height="64.5"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                             </view>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Chess" textAlignment="justified" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumFontSize="25" translatesAutoresizingMaskIntoConstraints="NO" id="Q4u-Ov-tdr">
-                                <rect key="frame" x="183" y="45" width="187" height="76"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Chess" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumFontSize="25" translatesAutoresizingMaskIntoConstraints="NO" id="Q4u-Ov-tdr">
+                                <rect key="frame" x="26" y="20" width="323" height="76"/>
                                 <fontDescription key="fontDescription" name="Chalkduster" family="Chalkduster" pointSize="60"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ITU-Cc-mzN">
-                                <rect key="frame" x="20" y="19" width="41" height="31"/>
-                                <fontDescription key="fontDescription" name="Chalkduster" family="Chalkduster" pointSize="15"/>
-                                <state key="normal" title="Back"/>
-                                <connections>
-                                    <action selector="back" destination="BYZ-38-t0r" eventType="touchUpInside" id="p6s-OQ-Eq6"/>
-                                </connections>
-                            </button>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="6wR-1J-Hie">
-                                <rect key="frame" x="20" y="60" width="91" height="31"/>
-                                <fontDescription key="fontDescription" name="Chalkduster" family="Chalkduster" pointSize="15"/>
-                                <state key="normal" title="New Game"/>
-                                <connections>
-                                    <action selector="newGame" destination="BYZ-38-t0r" eventType="touchUpInside" id="adI-B9-azt"/>
-                                </connections>
-                            </button>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                         <constraints>
-                            <constraint firstItem="MGb-A0-y9L" firstAttribute="top" secondItem="ITU-Cc-mzN" secondAttribute="bottom" constant="-50.5" id="31Z-0C-JhE"/>
-                            <constraint firstItem="Ws0-oN-g9Q" firstAttribute="top" secondItem="Q4u-Ov-tdr" secondAttribute="bottom" constant="25" id="8y2-Eg-fX7"/>
                             <constraint firstItem="djg-MW-t3C" firstAttribute="top" secondItem="Ws0-oN-g9Q" secondAttribute="bottom" constant="10" id="Du1-0X-uWw"/>
                             <constraint firstItem="Ws0-oN-g9Q" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="J3z-Zv-7nT"/>
                             <constraint firstItem="Ws0-oN-g9Q" firstAttribute="centerY" secondItem="8bC-Xf-vdC" secondAttribute="centerY" id="JuU-1a-Nq7"/>
+                            <constraint firstItem="Q4u-Ov-tdr" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" constant="10" id="Pz0-ml-SJ2"/>
                             <constraint firstItem="Ws0-oN-g9Q" firstAttribute="width" secondItem="8bC-Xf-vdC" secondAttribute="width" id="QKl-Jb-pKX"/>
+                            <constraint firstItem="Q4u-Ov-tdr" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" constant="20" id="Qlw-Dh-HRU"/>
                             <constraint firstItem="O6G-Oj-rhl" firstAttribute="top" secondItem="djg-MW-t3C" secondAttribute="bottom" constant="30" id="SLE-WL-wM2"/>
-                            <constraint firstItem="ITU-Cc-mzN" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="20" id="T79-9k-Z17"/>
                             <constraint firstItem="z4U-ib-WNJ" firstAttribute="trailing" secondItem="8bC-Xf-vdC" secondAttribute="trailingMargin" id="TB7-bU-pm3"/>
-                            <constraint firstItem="6wR-1J-Hie" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="20" id="UWr-DN-5VH"/>
                             <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="z4U-ib-WNJ" secondAttribute="bottom" constant="20" id="Ujr-0N-znS"/>
-                            <constraint firstItem="6wR-1J-Hie" firstAttribute="top" secondItem="ITU-Cc-mzN" secondAttribute="bottom" constant="10" id="V50-ka-5WR"/>
+                            <constraint firstItem="Q4u-Ov-tdr" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="Wvx-3Q-U1y"/>
                             <constraint firstItem="z4U-ib-WNJ" firstAttribute="top" secondItem="djg-MW-t3C" secondAttribute="bottom" constant="30" id="XL8-y8-cWz"/>
                             <constraint firstItem="z4U-ib-WNJ" firstAttribute="width" secondItem="O6G-Oj-rhl" secondAttribute="width" id="Zdm-lS-s9a"/>
                             <constraint firstItem="z4U-ib-WNJ" firstAttribute="height" secondItem="O6G-Oj-rhl" secondAttribute="height" id="cWE-Gc-SMn"/>
                             <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="O6G-Oj-rhl" secondAttribute="bottom" constant="20" id="hth-aj-CXu"/>
-                            <constraint firstAttribute="trailing" secondItem="Q4u-Ov-tdr" secondAttribute="trailing" constant="5" id="iXV-VD-5FA"/>
                             <constraint firstItem="MGb-A0-y9L" firstAttribute="width" secondItem="8bC-Xf-vdC" secondAttribute="width" id="j8m-B1-DOC"/>
                             <constraint firstItem="MGb-A0-y9L" firstAttribute="height" secondItem="8bC-Xf-vdC" secondAttribute="height" id="kOE-uN-mhq"/>
                             <constraint firstItem="O6G-Oj-rhl" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" id="lcj-z5-MXn"/>
@@ -298,7 +279,6 @@
         <!--Navigation Controller-->
         <scene sceneID="7vC-ln-Njk">
             <objects>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="jev-Te-puV" userLabel="First Responder" sceneMemberID="firstResponder"/>
                 <navigationController automaticallyAdjustsScrollViewInsets="NO" id="HXh-pA-y0b" sceneMemberID="viewController">
                     <toolbarItems/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="qUA-PE-pG4">
@@ -310,6 +290,7 @@
                         <segue destination="o5q-6E-Ldh" kind="relationship" relationship="rootViewController" id="j2Y-vU-Fcb"/>
                     </connections>
                 </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="jev-Te-puV" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="-895.20000000000005" y="118.29085457271366"/>
         </scene>
