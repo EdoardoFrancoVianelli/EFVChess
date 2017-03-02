@@ -14,13 +14,16 @@ protocol GameDelegate {
     func pieceSelected(piece : ChessPiece)
     func pieceDeselected()
     func gameOver(loser : Player)
+    func pieceMoved(piece : ChessPiece)
 }
 
 class Game{
     
     var gameOver : Bool = false{
         didSet{
-            delegate?.gameOver(loser: currentPlayer)
+            if gameOver{
+                delegate?.gameOver(loser: currentPlayer)
+            }
         }
     }
     
@@ -167,6 +170,7 @@ class Game{
             }
             
             piece.origin = (newPosition.x, newPosition.y)
+            self.delegate?.pieceMoved(piece: piece)
             self.switchTurns(moved: piece, oldPosition: oldPosition)
         }else{
             if let pawn = piece as? Pawn{
@@ -194,6 +198,7 @@ class Game{
         
         if self.board.consumePiece(piece1: piece1, piece2: piece2){
             pieceRemoved(piece: piece2)
+            self.delegate?.pieceMoved(piece: piece1)
             switchTurns(moved: piece1, oldPosition: oldPosition)
         }
         

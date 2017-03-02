@@ -30,7 +30,7 @@ class UIBoard : UIView, ChessBoardDelegate, UIChessPieceProtocol{
     
     private var pieces = Dictionary<String, UIChessPiece>()
     
-    private var tiles = [Tile]()
+    //private var tiles = [Tile]()
     private var selectedPiece : ChessPiece?{
         didSet{
             if let piece = selectedPiece{
@@ -43,15 +43,15 @@ class UIBoard : UIView, ChessBoardDelegate, UIChessPieceProtocol{
         super.init(frame: frame)
         initialize()
     }
-    
+
     func startGame(){
         game.startGame()
     }
     
     override var bounds: CGRect{
         didSet{
-            self.tiles = [Tile]()
-            self.drawLines()
+            //self.tiles = [Tile]()
+            self.setNeedsDisplay()
             for view in self.subviews{
                 if let piece = view as? UIChessPiece{
                     piece.frame.origin = CGPoint(x: xPoint(x: piece.x), y: yPoint(y: piece.y))
@@ -82,7 +82,7 @@ class UIBoard : UIView, ChessBoardDelegate, UIChessPieceProtocol{
     
     func initialize(){
         self.game.boardDelegate = self
-        self.drawLines()
+        self.setNeedsDisplay()
         self.initTapGesture()
         self.game.startGame()
     }
@@ -102,8 +102,15 @@ class UIBoard : UIView, ChessBoardDelegate, UIChessPieceProtocol{
         return CGFloat(y) * height
     }
     
-    private func drawLines(){
-        self.tiles = [Tile]()
+    private func drawTile(tile : Tile, color : UIColor){
+        tile.color = color
+        color.set()
+        tile.fill()
+    }
+    
+    func getTiles() -> [Tile]
+    {
+        var tiles = [Tile]()
         for i in 0..<64{
             let x = Int(i / 8)
             let y = i % 8
@@ -115,13 +122,7 @@ class UIBoard : UIView, ChessBoardDelegate, UIChessPieceProtocol{
             tile.close()
             tiles.append(tile)
         }
-        self.setNeedsDisplay()
-    }
-    
-    private func drawTile(tile : Tile, color : UIColor){
-        tile.color = color
-        color.set()
-        tile.fill()
+        return tiles
     }
     
     override func draw(_ rect: CGRect) {
@@ -130,6 +131,8 @@ class UIBoard : UIView, ChessBoardDelegate, UIChessPieceProtocol{
         let lightBrown = UIColor(red: 210/255, green: 105/255, blue: 30/255, alpha: 1.0)
         
         var prevs = [UIColor]()
+        
+        let tiles = getTiles()
         
         for i in 0..<tiles.count{
 
@@ -175,32 +178,10 @@ class UIBoard : UIView, ChessBoardDelegate, UIChessPieceProtocol{
             self.addSubview(new_piece)
         }
     }
-    
-    var audioPlayer : AVAudioPlayer?
-    
-    func playTap(){
-        do{
-            try! AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryAmbient)
-            if let path = Bundle.main.path(forResource: "keyboard_tap", ofType: "mp3"){
-                let alertSound = URL(fileURLWithPath: path)
-                audioPlayer = try AVAudioPlayer(contentsOf: alertSound)
-                audioPlayer?.prepareToPlay()
-                audioPlayer?.play()
-            }else{
-                print("Cannot find audio file")
-            }
-        }catch let error as NSError{
-            print(error)
-            print("Could not play sound")
-        }
-    }
 
     func pieceDidChangePosition(piece: ChessPiece, oldPosition: (x: Int, y: Int)) {
         let new_frame = CGRect(x: xPoint(x: piece.x), y: yPoint(y: piece.y), width:frame.size.width / 8, height:frame.size.height / 8)
         if let existingPiece = pieces["\(oldPosition.x)\(oldPosition.y)"]{
-            
-            playTap()
-            
             UIView.animate(withDuration: 0.5, animations: {
                 existingPiece.frame = new_frame
             })

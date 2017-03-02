@@ -7,8 +7,11 @@
 //
 
 import UIKit
+import AVFoundation
 
 //wood texture from http://www.psdgraphics.com/file/wood-texture.jpg
+
+let SoundOnSetting = "SoundOn"
 
 class ViewController: UIViewController, GameDelegate, SlidingMenuDelegate {
 
@@ -44,11 +47,49 @@ class ViewController: UIViewController, GameDelegate, SlidingMenuDelegate {
         }
     }
     
-    func selectedIndex(i: Int, content: (text: String, subtitle: String)) {
-        if i == 0{
+    var audioPlayer : AVAudioPlayer?
+    
+    func playTap(){
+        do{
+            try! AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryAmbient)
+            if let path = Bundle.main.path(forResource: "keyboard_tap", ofType: "mp3"){
+                let alertSound = URL(fileURLWithPath: path)
+                audioPlayer = try AVAudioPlayer(contentsOf: alertSound)
+                audioPlayer?.prepareToPlay()
+                audioPlayer?.play()
+            }else{
+                print("Cannot find audio file")
+            }
+        }catch let error as NSError{
+            print(error)
+            print("Could not play sound")
+        }
+    }
+    
+    func SetNoise(on : Bool){
+        UserDefaults.standard.set(on, forKey: SoundOnSetting)
+    }
+    
+    func pieceMoved(piece: ChessPiece) {
+        if let soundOn = UserDefaults.standard.object(forKey: SoundOnSetting) as? Bool{
+            if soundOn { playTap() }
+        }else{
+            playTap()
+        }
+    }
+    
+    func switchChangedValue(sender: UISwitch, i: IndexPath) {
+        print("Sound \(sender.isOn ? "on" : "off")")
+        SetNoise(on: sender.isOn)
+    }
+    
+    func selectedIndex(i: IndexPath, content: (text: String, subtitle: String)) {
+        if content.text == "New Game"{
             newGame()
-        }else if i == 2{
+        }else if content.text == "Deleted pieces"{
             self.performSegue(withIdentifier: "deletedPiecesSegue", sender: self)
+        }else if content.text == "Main Menu"{
+            back()
         }
     }
     
@@ -66,13 +107,14 @@ class ViewController: UIViewController, GameDelegate, SlidingMenuDelegate {
     
     var selectedPiece : ChessPiece = ChessPiece(x: 0, y: 0, movement: PawnMovement(), player: Player(name: "", id: 1)){
         didSet{
+            let image = pieceImages[selectedPiece.name]!
             if (self.currentPlayer.id == 1 && selectedPiece.player.id == 1){
                 player1Box.piece = selectedPiece
-                player1Box.image = imageForPiece(piece: selectedPiece)!
+                player1Box.image = image!
                 player1Box.setWhite()
             }else if (self.currentPlayer.id == 2 && selectedPiece.player.id == 2){
                 player2Box.piece = selectedPiece
-                player2Box.image = imageForPiece(piece: selectedPiece)!
+                player2Box.image = image!
             }
         }
     }
@@ -88,6 +130,8 @@ class ViewController: UIViewController, GameDelegate, SlidingMenuDelegate {
         slidingMenu?.addElement(text: "Deleted pieces", subtitle: "See the game's deleted pieces", section: 0)
         slidingMenu?.addHeader(name: "Settings")
         slidingMenu?.addSwitch(text: "Sound", section: 1)
+        slidingMenu?.addHeader(name: "Other")
+        slidingMenu?.addElement(text: "Main Menu", subtitle: "Go back to main menu", section: 2)
         slidingMenu?.delegate = self
     }
     
@@ -103,6 +147,7 @@ class ViewController: UIViewController, GameDelegate, SlidingMenuDelegate {
     }
     
     func timeTicked(timer : Timer){
+        //report_memory()
         if currentPlayer.id == 1{
             player1Box.secondsPassed += 1
         }else{

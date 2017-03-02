@@ -9,7 +9,8 @@
 import UIKit
 
 protocol SlidingMenuDelegate {
-    func selectedIndex(i : Int, content : (text : String, subtitle : String))
+    func selectedIndex(i : IndexPath, content : (text : String, subtitle : String))
+    func switchChangedValue(sender : UISwitch, i : IndexPath)
 }
 
 class SlidingMenu: UIView, UITableViewDelegate, UITableViewDataSource{
@@ -113,6 +114,15 @@ class SlidingMenu: UIView, UITableViewDelegate, UITableViewDataSource{
         return elements[section].count
     }
     
+    internal func handleValueChanged(sender : UISwitch){
+        if let cell = (sender.superview as? UITableViewCell){
+            if let cellPath = table?.indexPath(for: cell){
+                delegate?.switchChangedValue(sender: sender, i: cellPath)
+                hide()
+            }
+        }
+    }
+    
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = UITableViewCell(style: .subtitle, reuseIdentifier: "elementCell")
         cell.textLabel?.text = elements[indexPath.section][indexPath.row].text
@@ -123,6 +133,7 @@ class SlidingMenu: UIView, UITableViewDelegate, UITableViewDataSource{
         }else{
             let opt_switch = UISwitch(frame: CGRect(origin: CGPoint.zero, size: CGSize(width: 51.0, height: 31.0)))
             opt_switch.frame.origin = CGPoint(x: frame.size.width - opt_switch.frame.width - 10, y: (cell.frame.size.height / 2) - opt_switch.frame.size.height / 2)
+            opt_switch.addTarget(self, action: #selector(handleValueChanged), for: .valueChanged)
             cell.addSubview(opt_switch)
         }
         cell.detailTextLabel?.textAlignment = .right
@@ -131,7 +142,7 @@ class SlidingMenu: UIView, UITableViewDelegate, UITableViewDataSource{
     
     private func selectedRow(indexPath : IndexPath){
         table?.deselectRow(at: indexPath, animated: true)
-        delegate?.selectedIndex(i: indexPath.row, content: elements[indexPath.section][indexPath.row])
+        delegate?.selectedIndex(i: indexPath, content: elements[indexPath.section][indexPath.row])
         hide()
     }
     
