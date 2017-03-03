@@ -17,15 +17,13 @@ protocol ChessBoardDelegate {
 class ChessBoard : ChessPieceDelegate {
     
     var player1Check : ChessPiece?{
-        return p1Check
+        return pieceVulnerable(piece: player1King)
     }
     
     var player2Check : ChessPiece?{
-        return p2Check
+        return pieceVulnerable(piece: player2King)
     }
     
-    private var p1Check : ChessPiece?
-    private var p2Check : ChessPiece?
     
     private var player1King : King
     private var player2King : King
@@ -57,7 +55,7 @@ class ChessBoard : ChessPieceDelegate {
         self.player2King = King(x: 0, y: 0, movement: KingMovement(), player: Player(name: "", id: 2))
     }
     
-    private func pieceCanEat(piece : ChessPiece, other : ChessPiece) -> Bool{
+    func pieceCanEat(piece : ChessPiece, other : ChessPiece) -> Bool{
         
         if piece.player == other.player{
             return false
@@ -93,7 +91,7 @@ class ChessBoard : ChessPieceDelegate {
         var i = attacker.origin.x
         var j = attacker.origin.y
         
-        while i < attacked.x && j < attacked.y{
+        while i != attacked.x && j != attacked.y{
             for piece in pieces_to_check{
                 if CheckBetween(startLocation: piece.origin, endLocation: attacked.origin, increments: (x_inc, y_inc)){
                     return piece
@@ -174,19 +172,6 @@ class ChessBoard : ChessPieceDelegate {
         }
         
         return nil
-    }
-    
-    func consumePiece(piece1 : ChessPiece, piece2 : ChessPiece) -> Bool{
-        
-        if pieceCanEat(piece: piece1, other: piece2){
-            removePiece(piece: piece2)
-            piece1.origin = (piece2.x, piece2.y)
-            return true
-        }else {
-            print("\(piece1) cannot eat \(piece2)")
-        }
-        
-        return false
     }
     
     private func CheckBetween(startLocation : (x : Int, y : Int),
@@ -330,19 +315,6 @@ class ChessBoard : ChessPieceDelegate {
         self.board.removeValue(forKey: "\(oldPosition.x)\(oldPosition.y)")
         self.board["\(piece.x)\(piece.y)"] = piece
         delegate?.pieceDidChangePosition(piece: piece, oldPosition: oldPosition)
-        
-        p1Check = nil
-        p2Check = nil
-        
-        if let att_piece = self.pieceVulnerable(piece: self.player1King){
-            print("\(self.player1King) is not safe in this position, can be attacked by \(att_piece)")
-            p1Check = att_piece
-        }
-        
-        if let att_piece = self.pieceVulnerable(piece: self.player2King){
-            print("\(self.player2King) is not safe in this position, can be attacked by \(att_piece)")
-            p2Check = att_piece
-        }
     }
     
     func addPiece(piece : ChessPiece){
@@ -358,14 +330,6 @@ class ChessBoard : ChessPieceDelegate {
         self.board["\(piece.x)\(piece.y)"] = piece
         piece.delegate = self
         self.delegate?.pieceAdded(piece: piece)
-    }
-    
-    func removeAllPieces(){
-        for element in self.board{
-            removePiece(piece: element.value)
-        }
-        
-        self.board = Dictionary<String, ChessPiece>()
     }
     
     func removePiece(piece : ChessPiece){

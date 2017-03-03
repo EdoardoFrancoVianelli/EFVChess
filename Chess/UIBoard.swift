@@ -22,8 +22,11 @@ class Tile : UIBezierPath{
 class UIBoard : UIView, ChessBoardDelegate, UIChessPieceProtocol{
     
     internal func pieceRemoved(piece: ChessPiece) {
-        pieces["\(piece.x)\(piece.y)"]?.removeFromSuperview()
-        pieces.removeValue(forKey: "\(piece.x)\(piece.y)")
+        if let removed = pieces["\(piece.x)\(piece.y)"]{
+            removed.clearImage()
+            removed.removeFromSuperview()
+            pieces.removeValue(forKey: "\(piece.x)\(piece.y)")
+        }
     }
     
     var game : Game = Game(p1: Player(name:"", id:1), p2: Player(name: "", id: 2))

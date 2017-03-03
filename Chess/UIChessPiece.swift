@@ -94,6 +94,10 @@ class UIChessPiece : UIView{
         self.delegate?.pieceSelected(piece: self.piece)
     }
     
+    func clearImage(){
+        self.image.image = nil
+    }
+    
     private func updateImageFrame(){
         self.image.frame = CGRect(origin: CGPoint(x: self.bounds.size.width / 8, y: self.bounds.size.height / 8),
                                   size: CGSize(width: self.bounds.size.width * 6/8, height: self.bounds.size.height * 6/8))
