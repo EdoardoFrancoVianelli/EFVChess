@@ -100,7 +100,7 @@ class Game{
     func verifyCheckMate(p : Player, attackingPiece : ChessPiece, attacked : ChessPiece){ //check if the current player is in checkmate
         //checkmate if the attacking piece cannot be blocked or eaten
         
-        let kingAttacker = board.pieceVulnerable(piece: attackingPiece)
+        let (kingAttacker, _) = board.pieceVulnerable(piece: attackingPiece)
         let blockingPiece = board.pieceCanBeBlockedFromAttackingPiece(attacker: attackingPiece, attacked: attacked)
         
         if ( kingAttacker == nil && blockingPiece == nil){
@@ -111,12 +111,17 @@ class Game{
     
     func switchTurns(moved : ChessPiece, oldPosition : (x : Int, y : Int), pieceRemoved : ChessPiece?){
         
+        print("Positions for moved \(moved) are \(board.pieceVulnerable(piece: moved).locations)")
+        
         if gameOver { return }
         
         if let attacker = (currentTurn == _player1) ? board.player1Check : board.player2Check{
             let king     = (currentTurn == _player1) ? board.firstPlayerKing : board.secondPlayerKing
             playerInCheck(p: currentTurn, moved: moved, oldPosition: oldPosition, consumedPiece: pieceRemoved)
             verifyCheckMate(p: currentTurn, attackingPiece: attacker, attacked: king)
+            if pieceRemoved != nil{
+                board.addPiece(piece: pieceRemoved!)
+            }
             return
         }
         self.currentTurn = (self.currentTurn == _player1) ? _player2 : _player1
@@ -179,6 +184,7 @@ class Game{
                     (piece.allowedMovement as! PawnMovement).movedTwo = true
                     pawn.origin = newPosition
                     self.switchTurns(moved: piece, oldPosition: oldPosition, pieceRemoved: nil)
+                    self.delegate?.pieceMoved(piece: pawn)
                 }
             }
         }

@@ -17,11 +17,11 @@ protocol ChessBoardDelegate {
 class ChessBoard : ChessPieceDelegate {
     
     var player1Check : ChessPiece?{
-        return pieceVulnerable(piece: player1King)
+        return pieceVulnerable(piece: player1King).attacker
     }
     
     var player2Check : ChessPiece?{
-        return pieceVulnerable(piece: player2King)
+        return pieceVulnerable(piece: player2King).attacker
     }
     
     
@@ -103,13 +103,40 @@ class ChessBoard : ChessPieceDelegate {
         
         return nil
     }
+    /*
+    func allowedMovements(piece : ChessPiece){
+        var movements = [(x : Int, y : Int)]()
+        if piece is Pawn{
+            if piece.player.id == 1{
+                
+            }else if piece.player.id == 2{
+                
+            }
+        }else if piece is King{
+            
+        }else if piece is Rook{
+            
+        }else if piece is Queen{
+            
+        }else{ //Bishop
+            
+        }
+    }
+ */
     
-    func pieceVulnerable(piece : ChessPiece) -> ChessPiece?{
+    func pieceCanElude(_ piece : ChessPiece, otherPiece : ChessPiece){
+        
+    }
+    
+    func pieceVulnerable(piece : ChessPiece) -> (attacker : ChessPiece?, locations : [(x : Int, y : Int)]){
         
         let left_r_up_d = ["Left", "Right", "Up", "Down"]
-        let lr_ud_increments  : [(x : Int, y : Int)] = [(1,0), (0,1)]
+        let lr_ud_increments  : [(x : Int, y : Int)] = [(-1, 0), (1,0), (0, -1), (0, 1)]
         
         //check left and right
+        
+        var attacker : ChessPiece?
+        var locations = [(x : Int, y : Int)]()
         
         print(piece)
         
@@ -124,17 +151,24 @@ class ChessBoard : ChessPieceDelegate {
                     continue
                 }
                 print("\(x),\(y)")
+                if movementPossible(piece: piece, newPosition: (x,y)){
+                    locations.append((x,y))
+                }
                 if let currentPiece = self.board["\(x)\(y)"]{
                     
                     //check if the current piece can consume the other piece
                     
-                    let diff = abs(i - ((index == 0) ? piece.x : piece.y))
+                    let x_diff = abs(piece.x - currentPiece.x)
+                    let y_diff = abs(piece.y - currentPiece.y)
                     
-                    if ((diff > 1) && (currentPiece is Rook) || (currentPiece is Queen)) || (diff == 1 && currentPiece is King){
-                        if currentPiece.player == piece.player{
-                            break
-                        }
-                        return currentPiece
+                    if piece.player == currentPiece.player{
+                        break
+                    }
+                    
+                    if (currentPiece is Queen || currentPiece is Rook) && ((x_diff == 0 && y_diff > 0) || (y_diff == 0 && x_diff > 0)){
+                        attacker = currentPiece
+                    }else if currentPiece is King && (x_diff <= 1 && y_diff <= 1){
+                        attacker = currentPiece
                     }
                     
                     break;
@@ -151,6 +185,9 @@ class ChessBoard : ChessPieceDelegate {
             var current : (x : Int, y : Int) = (piece.origin.x + increment.x, piece.origin.y + increment.y)
             print(diagonal_descr[i])
             while current.x >= 0 && current.x < 8 && current.y >= 0 && current.y < 8{
+                if movementPossible(piece: piece, newPosition: current){
+                    locations.append(current)
+                }
                 if let currentPiece = self.board["\(current.x)\(current.y)"]{
                                         
                     let y_diff = currentPiece.y - piece.y //if y is greater than 0, is is below, otherwise it is abow
@@ -160,7 +197,7 @@ class ChessBoard : ChessPieceDelegate {
                         if currentPiece.player == piece.player{
                             break
                         }
-                        return currentPiece
+                        attacker = currentPiece
                     }
                     
                     break;
@@ -171,7 +208,7 @@ class ChessBoard : ChessPieceDelegate {
             }
         }
         
-        return nil
+        return (attacker, locations)
     }
     
     private func CheckBetween(startLocation : (x : Int, y : Int),

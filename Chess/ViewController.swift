@@ -15,14 +15,13 @@ let SoundOnSetting = "SoundOn"
 
 class ViewController: UIViewController, GameDelegate, SlidingMenuDelegate {
 
+    var gameOver : Bool = false
+    
     var slidingMenu: SlidingMenu?
     var check : Player?
     
     @IBOutlet weak var player2Box: ChessStatusBox!
     @IBOutlet weak var player1Box: ChessStatusBox!
-    
-    var firstTimer = Timer()
-    var secondTimer = Timer()
     
     var firstPlayerName : String = ""
     var secondPlayerName : String = ""
@@ -48,18 +47,21 @@ class ViewController: UIViewController, GameDelegate, SlidingMenuDelegate {
     }
     
     var audioPlayer : AVAudioPlayer?
+    var soundURL : URL?
+    
+    func getSoundURL() -> URL?{
+        let alertSound = URL(fileURLWithPath: Bundle.main.path(forResource: "keyboard_tap", ofType: "mp3")!)
+        return alertSound
+    }
     
     func playTap(){
         do{
-            try! AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryAmbient)
-            if let path = Bundle.main.path(forResource: "keyboard_tap", ofType: "mp3"){
-                let alertSound = URL(fileURLWithPath: path)
-                audioPlayer = try AVAudioPlayer(contentsOf: alertSound)
-                audioPlayer?.prepareToPlay()
-                audioPlayer?.play()
-            }else{
-                print("Cannot find audio file")
+            if soundURL == nil {
+                soundURL = getSoundURL()
             }
+            audioPlayer = try AVAudioPlayer(contentsOf: soundURL!)
+            audioPlayer?.prepareToPlay()
+            audioPlayer?.play()
         }catch let error as NSError{
             print(error)
             print("Could not play sound")
@@ -147,6 +149,9 @@ class ViewController: UIViewController, GameDelegate, SlidingMenuDelegate {
     }
     
     func timeTicked(timer : Timer){
+        if gameOver{
+            timer.invalidate()
+        }
         //report_memory()
         if currentPlayer.id == 1{
             player1Box.secondsPassed += 1
@@ -195,6 +200,7 @@ class ViewController: UIViewController, GameDelegate, SlidingMenuDelegate {
         let controller = UIAlertController(title: "GAME OVER", message: loser.description + " lost", preferredStyle: .alert)
         controller.addAction(UIAlertAction(title: "Ok", style: .cancel, handler: nil))
         present(controller, animated: false, completion: nil)
+        self.gameOver = true
     }
     
     func pieceDeselected() {
