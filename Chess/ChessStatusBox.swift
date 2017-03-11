@@ -20,9 +20,54 @@ class ChessStatusBox: UIView {
         }
     }
     
+    private var imageDisplayer : UIImageView
+    private var pieceLabel : UILabel
+    var confirmButton : UIButton?
+    var cancelButton : UIButton?
+    
+    func initializeButtons(){
+        let buttonWidth = self.frame.size.width / 2
+        let buttonHeight = self.frame.size.height
+        cancelButton = UIButton(frame: CGRect(x: 0, y: 0, width: buttonWidth, height: buttonHeight))
+        confirmButton = UIButton(frame: CGRect(x: buttonWidth, y: 0, width: buttonWidth, height: buttonHeight))
+       
+        cancelButton?.setTitleColor(UIColor.black, for: .normal)
+        cancelButton?.setTitleColor(UIColor.white, for: .highlighted)
+        
+        confirmButton?.setTitleColor(UIColor.black, for: .normal)
+        confirmButton?.setTitleColor(UIColor.white, for: .highlighted)
+        
+        cancelButton?.setTitle("Cancel", for: .normal)
+        confirmButton?.setTitle("Confirm", for: .normal)
+    }
+    
+    var showMoveApprovalView : Bool = false{
+        didSet{
+            if confirmButton == nil && cancelButton == nil{
+                initializeButtons()
+            }
+            if showMoveApprovalView{
+                UIView.animate(withDuration: 0.0, animations: {
+                    self.imageDisplayer.removeFromSuperview()
+                    self.pieceLabel.removeFromSuperview()
+                    self.addSubview(self.cancelButton!)
+                    self.addSubview(self.confirmButton!)
+                })
+            }else{
+                UIView.animate(withDuration: 0.0, animations: {
+                    self.cancelButton?.removeFromSuperview()
+                    self.confirmButton?.removeFromSuperview()
+                    self.addSubview(self.imageDisplayer)
+                    self.addSubview(self.pieceLabel)
+                })
+            }
+        }
+    }
+    
     var secondsPassed = 0{
         didSet{
             updateTitle()
+            showMoveApprovalView = secondsPassed % 3 == 0
         }
     }
     
@@ -56,9 +101,6 @@ class ChessStatusBox: UIView {
             self.layer.shadowRadius = 0
         }
     }
-    
-    private var imageDisplayer : UIImageView
-    private var pieceLabel : UILabel
     
     var image : UIImage{
         didSet{

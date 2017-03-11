@@ -14,6 +14,7 @@ protocol GameDelegate {
     func pieceSelected(piece : ChessPiece)
     func pieceDeselected()
     func gameOver(loser : Player)
+    func gameStarted()
     func pieceMoved(piece : ChessPiece)
 }
 
@@ -133,6 +134,7 @@ class Game{
     }
     
     func pieceSelected(piece : ChessPiece){
+        //let locations = board.pieceVulnerable(piece: piece).locations
         delegate?.pieceSelected(piece: piece)
     }
     
@@ -239,6 +241,7 @@ class Game{
         self.initBishops()
         self.initKings()
         self.initQueens()
+        delegate?.gameStarted()
     }
     
     private func initPawns(){

@@ -100,7 +100,15 @@ class ViewController: UIViewController, GameDelegate, SlidingMenuDelegate {
     }
     
     func newGame() {
-        board.startGame()
+        let gameStartAlert = UIAlertController(title: "Start new game?", message: "You will lose all progress in the last game", preferredStyle: .alert)
+        gameStartAlert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+        
+        gameStartAlert.addAction(UIAlertAction(title: "OK", style: .default, handler: {
+        
+            (action : UIAlertAction) in self.board.startGame()
+        
+        }))
+        present(gameStartAlert, animated: true, completion: nil)
     }
     
     @IBAction func back() {
@@ -194,6 +202,10 @@ class ViewController: UIViewController, GameDelegate, SlidingMenuDelegate {
     
     func pieceSelected(piece: ChessPiece) {
         self.selectedPiece = piece
+    }
+    
+    func gameStarted() {
+        self.statusLabel.text = ""
     }
     
     internal func gameOver(loser: Player) {
