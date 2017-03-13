@@ -30,7 +30,13 @@ class ChessStatusBox: UIView {
         let buttonHeight = self.frame.size.height
         cancelButton = UIButton(frame: CGRect(x: 0, y: 0, width: buttonWidth, height: buttonHeight))
         confirmButton = UIButton(frame: CGRect(x: buttonWidth, y: 0, width: buttonWidth, height: buttonHeight))
-       
+        
+        cancelButton?.titleLabel?.adjustsFontSizeToFitWidth = true
+        confirmButton?.titleLabel?.adjustsFontSizeToFitWidth = true
+        
+        cancelButton?.isUserInteractionEnabled = true
+        confirmButton?.isUserInteractionEnabled = true
+        
         cancelButton?.setTitleColor(UIColor.black, for: .normal)
         cancelButton?.setTitleColor(UIColor.white, for: .highlighted)
         
@@ -43,23 +49,16 @@ class ChessStatusBox: UIView {
     
     var showMoveApprovalView : Bool = false{
         didSet{
-            if confirmButton == nil && cancelButton == nil{
-                initializeButtons()
-            }
             if showMoveApprovalView{
-                UIView.animate(withDuration: 0.0, animations: {
-                    self.imageDisplayer.removeFromSuperview()
-                    self.pieceLabel.removeFromSuperview()
-                    self.addSubview(self.cancelButton!)
-                    self.addSubview(self.confirmButton!)
-                })
+                self.imageDisplayer.removeFromSuperview()
+                self.pieceLabel.removeFromSuperview()
+                self.addSubview(self.cancelButton!)
+                self.addSubview(self.confirmButton!)
             }else{
-                UIView.animate(withDuration: 0.0, animations: {
-                    self.cancelButton?.removeFromSuperview()
-                    self.confirmButton?.removeFromSuperview()
-                    self.addSubview(self.imageDisplayer)
-                    self.addSubview(self.pieceLabel)
-                })
+                self.cancelButton?.removeFromSuperview()
+                self.confirmButton?.removeFromSuperview()
+                self.addSubview(self.imageDisplayer)
+                self.addSubview(self.pieceLabel)
             }
         }
     }
@@ -67,7 +66,6 @@ class ChessStatusBox: UIView {
     var secondsPassed = 0{
         didSet{
             updateTitle()
-            showMoveApprovalView = secondsPassed % 3 == 0
         }
     }
     
@@ -174,6 +172,7 @@ class ChessStatusBox: UIView {
         initImage()
         initLabel()
         initAspect()
+        initializeButtons()
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -182,6 +181,29 @@ class ChessStatusBox: UIView {
         pieceLabel = UILabel()
         super.init(coder: aDecoder)
         initialize()
+    }
+    
+    var conf_action : (() -> ())?
+    var undo_action : (() -> ())?
+    
+    func addCancelAction(action : @escaping () -> ()){
+        self.undo_action = action
+        self.cancelButton!.addTarget(self, action: #selector(undo(button:)), for: .touchUpInside)
+    }
+    
+    func addConfirmAction(action : @escaping () -> ()){
+        self.conf_action = action
+        self.confirmButton!.addTarget(self, action: #selector(confirm(button:)), for: .touchUpInside)
+    }
+    
+    func undo(button : UIButton){
+        self.showMoveApprovalView = false
+        self.undo_action?()
+    }
+    
+    func confirm(button : UIButton){
+        self.showMoveApprovalView = false
+        self.conf_action?()
     }
     
     /*

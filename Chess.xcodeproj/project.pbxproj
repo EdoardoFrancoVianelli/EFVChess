@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A805F2401E75F8E7005E0B78 /* Move.swift in Sources */ = {isa = PBXBuildFile; fileRef = A805F23F1E75F8E7005E0B78 /* Move.swift */; };
 		A8531DEA1E405F4B004D553F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8531DE91E405F4B004D553F /* AppDelegate.swift */; };
 		A8531DEC1E405F4B004D553F /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8531DEB1E405F4B004D553F /* ViewController.swift */; };
 		A8531DEF1E405F4B004D553F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A8531DED1E405F4B004D553F /* Main.storyboard */; };
@@ -54,6 +55,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		A805F23F1E75F8E7005E0B78 /* Move.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Move.swift; sourceTree = "<group>"; };
 		A8531DE61E405F4B004D553F /* Chess.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Chess.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A8531DE91E405F4B004D553F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		A8531DEB1E405F4B004D553F /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -156,6 +158,7 @@
 				A8531E231E4BF7B2004D553F /* Player.swift */,
 				A8531E461E550B6E004D553F /* ChessStatusBox.swift */,
 				A8B1FA621E60E991008F2E76 /* SlidingMenu.swift */,
+				A805F23F1E75F8E7005E0B78 /* Move.swift */,
 			);
 			path = Chess;
 			sourceTree = "<group>";
@@ -353,6 +356,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A805F2401E75F8E7005E0B78 /* Move.swift in Sources */,
 				A8531DEC1E405F4B004D553F /* ViewController.swift in Sources */,
 				A8531E1A1E405F6B004D553F /* ChessBoard.swift in Sources */,
 				A8531E221E4BF7AB004D553F /* Game.swift in Sources */,

@@ -20,6 +20,8 @@ protocol GameDelegate {
 
 class Game{
     
+    private var pendingMove : Move?
+    
     var gameOver : Bool = false{
         didSet{
             if gameOver{
@@ -110,6 +112,26 @@ class Game{
         }
     }
     
+    func undoPendingMove(){
+        if let pending = pendingMove{
+            pending.piece.origin = pending.previousLocation
+            if let pawn = pending.piece as? Pawn{
+                (pawn.allowedMovement as! PawnMovement).movedTwo = false
+            }
+            if let consumed = pending.consumedPiece{
+                self.board.addPiece(piece: consumed)
+            }
+            pendingMove = nil
+        }
+    }
+    
+    func confirmPendingMove(){
+        if let pending = pendingMove{
+            self.switchTurns(moved: pending.piece, oldPosition: pending.previousLocation, pieceRemoved: pending.consumedPiece)
+            pendingMove = nil
+        }
+    }
+    
     func switchTurns(moved : ChessPiece, oldPosition : (x : Int, y : Int), pieceRemoved : ChessPiece?){
         
         print("Positions for moved \(moved) are \(board.pieceVulnerable(piece: moved).locations)")
@@ -151,7 +173,16 @@ class Game{
         self._player2.name = p2
     }
     
+    func pieceMoved(piece : ChessPiece, previousLocation : (x : Int, y : Int), consumedPiece : ChessPiece?){
+        self.pendingMove = Move(piece: piece, previousLocation: previousLocation, consumedPiece: consumedPiece)
+        self.delegate?.pieceMoved(piece: piece)
+    }
+    
     func changePiecePosition(piece: ChessPiece, newPosition : (x : Int, y : Int)){
+        
+        if pendingMove != nil{
+            return
+        }
         
         if gameOver{
             print("Game is over, you can't move anything")
@@ -175,8 +206,8 @@ class Game{
             }
             
             piece.origin = (newPosition.x, newPosition.y)
-            self.delegate?.pieceMoved(piece: piece)
-            self.switchTurns(moved: piece, oldPosition: oldPosition, pieceRemoved: nil)
+            self.pieceMoved(piece: piece, previousLocation: oldPosition, consumedPiece: nil)
+            //self.switchTurns(moved: piece, oldPosition: oldPosition, pieceRemoved: nil)
         }else{
             if let pawn = piece as? Pawn{
                 if !(pawn.allowedMovement as! PawnMovement).movedTwo &&
@@ -185,8 +216,8 @@ class Game{
                     abs(piece.x - newPosition.x) == 0{
                     (piece.allowedMovement as! PawnMovement).movedTwo = true
                     pawn.origin = newPosition
-                    self.switchTurns(moved: piece, oldPosition: oldPosition, pieceRemoved: nil)
-                    self.delegate?.pieceMoved(piece: pawn)
+                    self.pieceMoved(piece: pawn, previousLocation: oldPosition, consumedPiece: nil)
+                    //self.switchTurns(moved: piece, oldPosition: oldPosition, pieceRemoved: nil)
                 }
             }
         }
@@ -216,6 +247,11 @@ class Game{
     }
     
     func consumePiece(piece1 : ChessPiece, piece2 : ChessPiece) -> Bool{
+        
+        if pendingMove != nil{
+            return false
+        }
+        
         let oldPosition = piece1.origin
         if piece1.player == piece2.player || currentPlayer != piece1.player{
             return false
@@ -223,8 +259,8 @@ class Game{
         
         if let consumed = self.consume(piece1: piece1, piece2: piece2){
             pieceRemoved(piece: piece2)
-            self.delegate?.pieceMoved(piece: piece1)
-            switchTurns(moved: piece1, oldPosition: oldPosition, pieceRemoved: consumed)
+            self.pieceMoved(piece: piece1, previousLocation: oldPosition, consumedPiece: consumed)
+            //switchTurns(moved: piece1, oldPosition: oldPosition, pieceRemoved: consumed)
         }
         
         return true

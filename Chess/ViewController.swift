@@ -78,6 +78,11 @@ class ViewController: UIViewController, GameDelegate, SlidingMenuDelegate {
         }else{
             playTap()
         }
+        if currentPlayer.id == 1{
+            player1Box.showMoveApprovalView = true
+        }else{
+            player2Box.showMoveApprovalView = true
+        }
     }
     
     func switchChangedValue(sender: UISwitch, i: IndexPath) {
@@ -153,6 +158,22 @@ class ViewController: UIViewController, GameDelegate, SlidingMenuDelegate {
         self.board.game.setPlayerNames(p1: firstPlayerName, p2: secondPlayerName)
         let timer = Timer(timeInterval: 1.0, repeats: true, block: timeTicked)
         RunLoop.current.add(timer, forMode: .defaultRunLoopMode)
+        
+        self.player1Box.addConfirmAction {
+            self.board.game.confirmPendingMove()
+        }
+        self.player2Box.addConfirmAction {
+            self.board.game.confirmPendingMove()
+        }
+        
+        self.player1Box.addCancelAction {
+            self.board.game.undoPendingMove()
+        }
+        
+        self.player2Box.addCancelAction {
+            self.board.game.undoPendingMove()
+        }
+        
         // Do any additional setup after loading the view, typically from a nib.
     }
     
