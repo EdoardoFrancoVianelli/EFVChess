@@ -13,7 +13,7 @@ import AVFoundation
 
 let SoundOnSetting = "SoundOn"
 
-class ViewController: UIViewController, GameDelegate, SlidingMenuDelegate {
+class ViewController: UIViewController, GameDelegate, SlidingMenuDelegate, StatusBoxDelegate {
 
     var gameOver : Bool = false
     
@@ -159,20 +159,8 @@ class ViewController: UIViewController, GameDelegate, SlidingMenuDelegate {
         let timer = Timer(timeInterval: 1.0, repeats: true, block: timeTicked)
         RunLoop.current.add(timer, forMode: .defaultRunLoopMode)
         
-        self.player1Box.addConfirmAction {
-            self.board.game.confirmPendingMove()
-        }
-        self.player2Box.addConfirmAction {
-            self.board.game.confirmPendingMove()
-        }
-        
-        self.player1Box.addCancelAction {
-            self.board.game.undoPendingMove()
-        }
-        
-        self.player2Box.addCancelAction {
-            self.board.game.undoPendingMove()
-        }
+        self.player1Box.delegate = self
+        self.player2Box.delegate = self
         
         // Do any additional setup after loading the view, typically from a nib.
     }
@@ -247,6 +235,16 @@ class ViewController: UIViewController, GameDelegate, SlidingMenuDelegate {
             dest.first_pieces = board.game.player1Deleted
             dest.second_pieces = board.game.player2Deleted
         }
+    }
+    
+    //MARK: Status Box Delegate
+    
+    func cancelActionFired() {
+        self.board.game.undoPendingMove()
+    }
+    
+    func confirmActionFired() {
+        self.board.game.confirmPendingMove()
     }
 }
 

@@ -178,21 +178,12 @@ class Game{
         self.delegate?.pieceMoved(piece: piece)
     }
     
-    func changePiecePosition(piece: ChessPiece, newPosition : (x : Int, y : Int)){
+    func changePiecePosition(piece: ChessPiece, newPosition : (x : Int, y : Int)) -> Bool{
         
-        if pendingMove != nil{
-            return
+        if pendingMove != nil || gameOver || piece.player != currentPlayer{
+            return false
         }
-        
-        if gameOver{
-            print("Game is over, you can't move anything")
-            return
-        }
-        
         let oldPosition = piece.origin
-        if piece.player != currentPlayer{
-            return
-        }
         let diff = piece.y - newPosition.y
         if self.board.canChangePiecePosition(piece: piece, newPosition: newPosition){
             
@@ -201,13 +192,13 @@ class Game{
             if piece is Pawn{
                 
                 if diff < 0 && !firstPlayerTurn || (diff > 0 && firstPlayerTurn){ //direction is downward
-                    return
+                    return false
                 }
             }
             
             piece.origin = (newPosition.x, newPosition.y)
             self.pieceMoved(piece: piece, previousLocation: oldPosition, consumedPiece: nil)
-            //self.switchTurns(moved: piece, oldPosition: oldPosition, pieceRemoved: nil)
+            return true
         }else{
             if let pawn = piece as? Pawn{
                 if !(pawn.allowedMovement as! PawnMovement).movedTwo &&
@@ -217,10 +208,11 @@ class Game{
                     (piece.allowedMovement as! PawnMovement).movedTwo = true
                     pawn.origin = newPosition
                     self.pieceMoved(piece: pawn, previousLocation: oldPosition, consumedPiece: nil)
-                    //self.switchTurns(moved: piece, oldPosition: oldPosition, pieceRemoved: nil)
+                    return true
                 }
             }
         }
+        return false
     }
     
     func addPiece(piece : ChessPiece){

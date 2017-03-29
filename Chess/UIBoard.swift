@@ -69,14 +69,32 @@ class UIBoard : UIView, ChessBoardDelegate, UIChessPieceProtocol{
         self.addGestureRecognizer(tapGesture)
     }
     
+    /*
+     Allow for the user to slightly tap outside and still get the move through, if it is within 10% of a square distance from
+     another box, try that other box too
+     */
+    
+    
     internal func handleTap(tap : UITapGestureRecognizer){
         if let selected = self.selectedPiece{
             let tapLocation = tap.location(in: self)
             //convert screen x and y to coordinate x and y
-            let new_x = Int(tapLocation.x / (self.frame.size.width / 8))
-            let new_y = Int(tapLocation.y / (self.frame.size.height / 8))
+            let new_x = (tapLocation.x / (self.frame.size.width / 8))
+            let new_y = (tapLocation.y / (self.frame.size.height / 8))
+            let x_diff = new_x - CGFloat(Int(new_x))
+            let y_diff = new_y - CGFloat(Int(new_y))
             DispatchQueue.main.async {
-                self.game.changePiecePosition(piece: selected, newPosition: (new_x, new_y))
+                let locations : (x : Int, y : Int) = (Int(new_x), Int(new_y))
+                let increments : [(x : Int, y : Int)] = [(0, 1), (0, -1), (1, 0), (-1, 0)]
+                let conditions : [Bool] = [(y_diff >= 0.9), (y_diff <= 0.1), (x_diff >= 0.9), (x_diff <= 0.1)]
+                if !self.game.changePiecePosition(piece: selected, newPosition: (locations.x, locations.y)){
+                    for i in 0..<4{
+                        let current : (x : Int, y : Int) = (locations.x + increments[i].x, locations.y + increments[i].y)
+                        if conditions[i] && self.game.changePiecePosition(piece: selected, newPosition: current){
+                            break
+                        }
+                    }
+                }
             }
         }
     }
@@ -170,7 +188,7 @@ class UIBoard : UIView, ChessBoardDelegate, UIChessPieceProtocol{
                                                    height:frame.size.height / 8),
                                      piece: piece)
 
-        if piece.y < 2{
+        if piece.player.id == 1{
             new_piece.setPieceWhite()
         }
         

@@ -43,8 +43,11 @@ class SlidingMenu: UIView, UITableViewDelegate, UITableViewDataSource{
     }
     
     func initPanGesture(sp : UIView){
+        let screenEdgeGesture = UIScreenEdgePanGestureRecognizer(target: self, action: #selector(handlePan(sender:)))
+        screenEdgeGesture.edges = .right
+        sp.addGestureRecognizer(screenEdgeGesture)
         let panGesture = UIPanGestureRecognizer(target: self, action: #selector(handlePan(sender:)))
-        sp.addGestureRecognizer(panGesture)
+        self.addGestureRecognizer(panGesture)
     }
     
     func setX(x : CGFloat, duration : TimeInterval){
@@ -158,7 +161,7 @@ class SlidingMenu: UIView, UITableViewDelegate, UITableViewDataSource{
         setX(x: superview!.frame.width, duration: 0.3)
     }
     
-    func handlePan(sender : UIPanGestureRecognizer){
+    func handlePan(sender : UIGestureRecognizer){
         let x : CGFloat = sender.location(in: superview).x
         switch sender.state{
             case .ended:

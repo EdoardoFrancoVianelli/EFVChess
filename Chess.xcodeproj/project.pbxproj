@@ -117,6 +117,24 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		A805F2411E7731DD005E0B78 /* Chess Pieces */ = {
+			isa = PBXGroup;
+			children = (
+				A8531E171E405F61004D553F /* ChessPiece.swift */,
+				A8531E1D1E406EE1004D553F /* UIChessPiece.swift */,
+			);
+			name = "Chess Pieces";
+			sourceTree = "<group>";
+		};
+		A805F2421E7731E8005E0B78 /* Board */ = {
+			isa = PBXGroup;
+			children = (
+				A8531E191E405F6B004D553F /* ChessBoard.swift */,
+				A8531E1B1E4061DB004D553F /* UIBoard.swift */,
+			);
+			name = Board;
+			sourceTree = "<group>";
+		};
 		A8531DDD1E405F4A004D553F = {
 			isa = PBXGroup;
 			children = (
@@ -150,10 +168,8 @@
 				A8531DF01E405F4B004D553F /* Assets.xcassets */,
 				A8531DF21E405F4B004D553F /* LaunchScreen.storyboard */,
 				A8531DF51E405F4B004D553F /* Info.plist */,
-				A8531E171E405F61004D553F /* ChessPiece.swift */,
-				A8531E1D1E406EE1004D553F /* UIChessPiece.swift */,
-				A8531E191E405F6B004D553F /* ChessBoard.swift */,
-				A8531E1B1E4061DB004D553F /* UIBoard.swift */,
+				A805F2411E7731DD005E0B78 /* Chess Pieces */,
+				A805F2421E7731E8005E0B78 /* Board */,
 				A8531E211E4BF7AB004D553F /* Game.swift */,
 				A8531E231E4BF7B2004D553F /* Player.swift */,
 				A8531E461E550B6E004D553F /* ChessStatusBox.swift */,

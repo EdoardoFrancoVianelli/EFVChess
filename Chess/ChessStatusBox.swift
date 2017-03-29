@@ -8,8 +8,15 @@
 
 import UIKit
 
+protocol StatusBoxDelegate {
+    func confirmActionFired()
+    func cancelActionFired()
+}
+
 @IBDesignable
 class ChessStatusBox: UIView {
+    
+    var delegate : StatusBoxDelegate?
     
     @IBInspectable
     var white : Bool = false{
@@ -25,26 +32,23 @@ class ChessStatusBox: UIView {
     var confirmButton : UIButton?
     var cancelButton : UIButton?
     
-    func initializeButtons(){
+    func initButton(title : String, x : CGFloat) -> UIButton{
         let buttonWidth = self.frame.size.width / 2
         let buttonHeight = self.frame.size.height
-        cancelButton = UIButton(frame: CGRect(x: 0, y: 0, width: buttonWidth, height: buttonHeight))
-        confirmButton = UIButton(frame: CGRect(x: buttonWidth, y: 0, width: buttonWidth, height: buttonHeight))
-        
-        cancelButton?.titleLabel?.adjustsFontSizeToFitWidth = true
-        confirmButton?.titleLabel?.adjustsFontSizeToFitWidth = true
-        
-        cancelButton?.isUserInteractionEnabled = true
-        confirmButton?.isUserInteractionEnabled = true
-        
-        cancelButton?.setTitleColor(UIColor.black, for: .normal)
-        cancelButton?.setTitleColor(UIColor.white, for: .highlighted)
-        
-        confirmButton?.setTitleColor(UIColor.black, for: .normal)
-        confirmButton?.setTitleColor(UIColor.white, for: .highlighted)
-        
-        cancelButton?.setTitle("Cancel", for: .normal)
-        confirmButton?.setTitle("Confirm", for: .normal)
+        let button = UIButton(frame: CGRect(x: x, y: 0, width: buttonWidth, height: buttonHeight))
+        button.titleLabel?.adjustsFontSizeToFitWidth = true
+        button.isUserInteractionEnabled = true
+        button.setTitleColor(UIColor.black, for: .normal)
+        button.setTitleColor(UIColor.white, for: .highlighted)
+        button.setTitle(title, for: .normal)
+        return button
+    }
+    
+    func initializeButtons(){
+        cancelButton = initButton(title: "Cancel", x: 0)
+        cancelButton?.addTarget(self, action: #selector(undo(button:)), for: .touchUpInside)
+        confirmButton = initButton(title: "Confirm", x: self.frame.size.width / 2)
+        confirmButton?.addTarget(self, action: #selector(confirm(button:)), for: .touchUpInside)
     }
     
     var showMoveApprovalView : Bool = false{
@@ -183,27 +187,14 @@ class ChessStatusBox: UIView {
         initialize()
     }
     
-    var conf_action : (() -> ())?
-    var undo_action : (() -> ())?
-    
-    func addCancelAction(action : @escaping () -> ()){
-        self.undo_action = action
-        self.cancelButton!.addTarget(self, action: #selector(undo(button:)), for: .touchUpInside)
-    }
-    
-    func addConfirmAction(action : @escaping () -> ()){
-        self.conf_action = action
-        self.confirmButton!.addTarget(self, action: #selector(confirm(button:)), for: .touchUpInside)
-    }
-    
     func undo(button : UIButton){
         self.showMoveApprovalView = false
-        self.undo_action?()
+        self.delegate?.cancelActionFired()
     }
     
     func confirm(button : UIButton){
         self.showMoveApprovalView = false
-        self.conf_action?()
+        self.delegate?.confirmActionFired()
     }
     
     /*
