@@ -10,10 +10,10 @@ import Foundation
 
 class Move{
     var piece : ChessPiece
-    var previousLocation : (x : Int, y : Int)
+    var previousLocation : Point
     var consumedPiece : ChessPiece?
     
-    init(piece : ChessPiece, previousLocation : (x : Int, y : Int), consumedPiece : ChessPiece?) {
+    init(piece : ChessPiece, previousLocation : Point, consumedPiece : ChessPiece?) {
         self.piece = piece
         self.previousLocation = previousLocation
         self.consumedPiece = consumedPiece

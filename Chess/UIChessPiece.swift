@@ -9,11 +9,15 @@
 import Foundation
 import UIKit
 
-protocol UIChessPieceProtocol{
+var pieceImages = ["Pawn" : UIImage(named: "chess-pawn.png"), "Bishop" : UIImage(named: "bishop.png"), "King" : UIImage(named: "chess-king.png"), "Queen" : UIImage(named: "chess-queen.png"), "Rook" : UIImage(named: "chess-rok.png"), "Knight" : UIImage(named: "chess-knight.png")]
+
+protocol UIChessPieceDelegate {
     func pieceSelected(piece : ChessPiece)
 }
 
-var pieceImages = ["Pawn" : UIImage(named: "chess-pawn.png"), "Bishop" : UIImage(named: "bishop.png"), "King" : UIImage(named: "chess-king.png"), "Queen" : UIImage(named: "chess-queen.png"), "Rook" : UIImage(named: "chess-rok.png"), "Knight" : UIImage(named: "chess-knight.png")]
+enum ChessPieceError: Error {
+    case NullDelegate
+}
 
 class UIChessPiece : UIView{
     
@@ -23,11 +27,10 @@ class UIChessPiece : UIView{
         return self.piece
     }
     
+    var delegate : UIChessPieceDelegate?
     private var piece : ChessPiece
     private var nameLabel : UILabel
     private var selected : Bool
-    
-    var delegate : UIChessPieceProtocol?
     
     var x : Int { return piece.x }
     var y : Int { return piece.y }
@@ -38,24 +41,24 @@ class UIChessPiece : UIView{
         }
     }
     
-    
-    var Selected : Bool{
-        get{
-            return self.selected
-        }set{
-            self.selected = newValue
-            if Selected{
-                delegate?.pieceSelected(piece: self.piece)
-            }
-        }
-    }
-    
     var nameColor : UIColor{
         get{
             return self.nameLabel.textColor
         }set{
             self.nameLabel.textColor = newValue
         }
+    }
+    
+    internal func pieceTapped() throws {
+        if delegate == nil{
+            throw ChessPieceError.NullDelegate
+        }
+        delegate?.pieceSelected(piece: self.piece)
+    }
+
+    private func initGesture(){
+        let tap = UITapGestureRecognizer(target: self, action: #selector(self.pieceTapped))
+        self.addGestureRecognizer(tap)
     }
     
     func activateGlow(){
@@ -80,18 +83,7 @@ class UIChessPiece : UIView{
         self.selected = false
         super.init(frame: frame)
         self.initAspect()
-        self.initTapGesture()
-    }
-    
-    private func initTapGesture(){
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(pieceTapped))
-        tapGesture.numberOfTapsRequired = 1
-        self.addGestureRecognizer(tapGesture)
-    }
-    
-    func pieceTapped(gesture : UITapGestureRecognizer){
-        self.selected = true
-        self.delegate?.pieceSelected(piece: self.piece)
+        self.initGesture()
     }
     
     func clearImage(){
@@ -116,12 +108,11 @@ class UIChessPiece : UIView{
     }
     
     required init?(coder aDecoder: NSCoder) {
-        self.piece = ChessPiece(x: 0, y: 0, movement: PawnMovement(), player: Player(name: "", id: 1))
+        self.piece = ChessPiece(origin: Point(0,0), movement: PawnMovement(), player: Player(name: "", id: 1))
         self.nameLabel = UILabel()
         self.selected = false
         super.init(coder: aDecoder)
         self.initAspect()
-        self.initTapGesture()
     }
 
     

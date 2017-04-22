@@ -67,6 +67,10 @@ class ChessStatusBox: UIView {
         }
     }
     
+    func resetSeconds(){
+        self.secondsPassed = 0
+    }
+    
     var secondsPassed = 0{
         didSet{
             updateTitle()
@@ -110,7 +114,7 @@ class ChessStatusBox: UIView {
         }
     }
     
-    var piece : ChessPiece = Pawn(x: 0, y: 0, movement: PawnMovement(), player: Player(name: "", id: 0)){
+    var piece : ChessPiece = Pawn(origin: Point(0,0), movement: PawnMovement(), player: Player(name: "", id: 0)){
         didSet{
             updateTitle()
         }

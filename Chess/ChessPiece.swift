@@ -18,10 +18,11 @@ protocol Movement{
     var canMoveDirectlyBackwards : Bool { get }
     var canMoveDirectlyLeft : Bool { get }
     var canMoveDirectlyRight : Bool { get }
-    var forward : Int { get }
+    var up : Int { get }
     var right   : Int { get }
-    var backwards : Int { get }
+    var down : Int { get }
     var left      : Int { get }
+    var diagonal : Int { get }
 }
 
 class PawnMovement : Movement{
@@ -38,13 +39,21 @@ class PawnMovement : Movement{
     var canMoveDirectlyLeft: Bool{ return false }
     var canMoveDirectlyRight: Bool{ return false }
 
-    var forward: Int{ return 1 }
+    private var _up = 1
+    private var _down = 0
+    func setUpDown(up : Int, down : Int){
+        if up != 1 && down != 1 && up != 0 && down != 0{
+            return
+        }
+        self._up = up
+        self._down = down
+    }
     
+    var up: Int{ return _up }
     var right: Int{ return 0 }
-    
-    var backwards: Int{ return 0 }
-    
+    var down: Int{ return _down }
     var left: Int{ return 0 }
+    var diagonal : Int { return 0 }
 }
 
 class RookMovement : Movement{
@@ -55,11 +64,11 @@ class RookMovement : Movement{
     var canMoveDirectlyLeft: Bool{ return true }
     var canMoveDirectlyRight: Bool{ return true }
     
-    var forward: Int{ return 8 }
+    var up: Int{ return 8 }
     var right: Int{ return 8 }
     var left: Int{ return 8 }
-    var backwards: Int{ return 8 }
-    
+    var down: Int{ return 8 }
+    var diagonal : Int { return 0 }
 }
 
 class KnightMovement : Movement{
@@ -70,10 +79,11 @@ class KnightMovement : Movement{
     var canMoveDirectlyLeft : Bool { return false }
     var canMoveDirectlyRight: Bool { return false }
     
-    var forward: Int{ return 2 }
-    var backwards: Int{ return 2 }
-    var left: Int{ return 1 }
-    var right : Int{ return 1 }
+    var up: Int{ return 0 }
+    var down: Int{ return 0 }
+    var left: Int{ return 0 }
+    var right : Int{ return 0 }
+    var diagonal : Int { return 0 }
 }
 
 class BishopMovement : Movement{
@@ -83,10 +93,11 @@ class BishopMovement : Movement{
     var canMoveDirectlyLeft : Bool { return false }
     var canMoveDirectlyRight: Bool { return false }
     
-    var forward: Int{ return 8 }
-    var backwards: Int{ return 8 }
-    var left: Int{ return 8 }
-    var right : Int{ return 8 }
+    var up: Int{ return 0 }
+    var down: Int{ return 0 }
+    var left: Int{ return 0 }
+    var right : Int{ return 0 }
+    var diagonal : Int { return 8 }
 }
 
 class QueenMovement : Movement{
@@ -96,10 +107,11 @@ class QueenMovement : Movement{
     var canMoveDirectlyLeft : Bool { return true }
     var canMoveDirectlyRight: Bool { return true }
     
-    var forward: Int{ return 8 }
-    var backwards: Int{ return 8 }
+    var up: Int{ return 8 }
+    var down: Int{ return 8 }
     var left: Int{ return 8 }
     var right : Int{ return 8 }
+    var diagonal : Int { return 8 }
 }
 
 class KingMovement : Movement{
@@ -109,24 +121,25 @@ class KingMovement : Movement{
     var canMoveDirectlyLeft : Bool { return true }
     var canMoveDirectlyRight: Bool { return true }
     
-    var forward: Int{ return 1 }
-    var backwards: Int{ return 1 }
+    var up: Int{ return 1 }
+    var down: Int{ return 1 }
     var left: Int{ return 1 }
     var right : Int{ return 1 }
+    var diagonal : Int { return 1 }
 }
 
 protocol ChessPieceDelegate{
-    func positionDidChange(piece : ChessPiece, oldPosition : (x : Int, y : Int))
+    func positionDidChange(piece : ChessPiece, oldPosition : Point)
 }
 
-class ChessPiece : CustomStringConvertible{
+class ChessPiece : CustomStringConvertible, Equatable, Hashable{
     
     var player : Player
     var delegate : ChessPieceDelegate?
     
     var allowedMovement : Movement
     
-    var origin : (x : Int, y : Int) = (0,0){
+    var origin : Point = Point(0,0){
         didSet{
             if origin != oldValue{
                 delegate?.positionDidChange(piece: self, oldPosition: oldValue)
@@ -152,8 +165,8 @@ class ChessPiece : CustomStringConvertible{
         }
     }
     
-    init(x : Int, y : Int, movement : Movement, player : Player){
-        self.origin = (x, y)
+    init(origin : Point, movement : Movement, player : Player){
+        self.origin = origin
         self.allowedMovement = movement
         self.player = player
     }
@@ -162,6 +175,14 @@ class ChessPiece : CustomStringConvertible{
         get{
             return "\(name) x:\(x) y:\(y)"
         }
+    }
+    
+    public var hashValue: Int {
+        return x * 10 + y * 100
+    }
+    
+    public static func ==(lhs: ChessPiece, rhs: ChessPiece) -> Bool{
+        return lhs.name == rhs.name && lhs.origin == rhs.origin
     }
 }
 
@@ -173,8 +194,8 @@ class Pawn : ChessPiece{
         }
     }
     
-    init(x: Int, y: Int, movement : PawnMovement, player : Player) {
-        super.init(x: x, y: y, movement: movement, player: player)
+    init(origin : Point, movement : PawnMovement, player : Player) {
+        super.init(origin: origin, movement: movement, player: player)
     }
 }
 
@@ -185,8 +206,8 @@ class Rook : ChessPiece{
         }
     }
     
-    override init(x: Int, y: Int, movement : Movement, player : Player) {
-        super.init(x: x, y: y, movement: movement, player: player)
+    override init(origin : Point, movement : Movement, player : Player) {
+        super.init(origin: origin, movement: movement, player: player)
     }
 }
 
@@ -197,8 +218,8 @@ class Knight : ChessPiece{
         }
     }
     
-    override init(x: Int, y: Int, movement : Movement, player : Player) {
-        super.init(x: x, y: y, movement: movement, player: player)
+    override init(origin : Point, movement : Movement, player : Player) {
+        super.init(origin: origin, movement: movement, player: player)
     }
 }
 
@@ -209,8 +230,8 @@ class Bishop : ChessPiece{
         }
     }
     
-    override init(x: Int, y: Int, movement : Movement, player : Player) {
-        super.init(x: x, y: y, movement: movement, player: player)
+    override init(origin : Point, movement : Movement, player : Player) {
+        super.init(origin: origin, movement: movement, player: player)
     }
 }
 
@@ -221,8 +242,8 @@ class Queen : ChessPiece{
         }
     }
     
-    override init(x: Int, y: Int, movement : Movement, player : Player) {
-        super.init(x: x, y: y, movement: movement, player: player)
+    override init(origin : Point, movement : Movement, player : Player) {
+        super.init(origin: origin, movement: movement, player: player)
     }
 }
 
@@ -234,8 +255,8 @@ class King : ChessPiece{
         }
     }
     
-    override init(x: Int, y: Int, movement : Movement, player : Player) {
-        super.init(x: x, y: y, movement: movement, player: player)
+    override init(origin : Point, movement : Movement, player : Player) {
+        super.init(origin: origin, movement: movement, player: player)
     }
 }
 

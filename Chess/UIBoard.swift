@@ -17,11 +17,19 @@ class Tile : UIBezierPath{
     
 }
 
+protocol UIBoardDelegate{
+    func pieceTapped(piece : ChessPiece)
+    func moveRequested(newLocation : (x : Float, y : Float))
+}
+
 @IBDesignable
 
-class UIBoard : UIView, ChessBoardDelegate, UIChessPieceProtocol{
+class UIBoard : UIView, ChessBoardDelegate, UIChessPieceDelegate{
+    
+    var delegate : UIBoardDelegate?
     
     internal func pieceRemoved(piece: ChessPiece) {
+
         if let removed = pieces["\(piece.x)\(piece.y)"]{
             removed.clearImage()
             removed.removeFromSuperview()
@@ -29,28 +37,30 @@ class UIBoard : UIView, ChessBoardDelegate, UIChessPieceProtocol{
         }
     }
     
-    var game : Game = Game(p1: Player(name:"", id:1), p2: Player(name: "", id: 2))
-    
     private var pieces = Dictionary<String, UIChessPiece>()
-    
-    //private var tiles = [Tile]()
-    private var selectedPiece : ChessPiece?{
-        didSet{
-            if let piece = selectedPiece{
-                self.game.pieceSelected(piece: piece)
-            }
-        }
-    }
-    
+
     override init(frame: CGRect) {
         super.init(frame: frame)
         initialize()
     }
-
-    func startGame(){
-        game.startGame()
-    }
     
+    private var angle : CGFloat = 0.0
+    
+    func rotate(){
+        if angle == 0.0{
+            angle = CGFloat(M_PI)
+        }else{
+            angle = 0.0
+        }
+        
+        UIView.animate(withDuration: 1, animations: {
+            self.transform = CGAffineTransform.init(rotationAngle: self.angle)
+            for view in self.subviews{
+                view.transform = CGAffineTransform.init(rotationAngle: self.angle)
+            }
+        })
+    }
+
     override var bounds: CGRect{
         didSet{
             //self.tiles = [Tile]()
@@ -64,48 +74,12 @@ class UIBoard : UIView, ChessBoardDelegate, UIChessPieceProtocol{
         }
     }
     
-    private func initTapGesture(){
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap))
-        self.addGestureRecognizer(tapGesture)
-    }
-    
-    /*
-     Allow for the user to slightly tap outside and still get the move through, if it is within 10% of a square distance from
-     another box, try that other box too
-     */
-    
-    
-    internal func handleTap(tap : UITapGestureRecognizer){
-        if let selected = self.selectedPiece{
-            let tapLocation = tap.location(in: self)
-            //convert screen x and y to coordinate x and y
-            let new_x = (tapLocation.x / (self.frame.size.width / 8))
-            let new_y = (tapLocation.y / (self.frame.size.height / 8))
-            let x_diff = new_x - CGFloat(Int(new_x))
-            let y_diff = new_y - CGFloat(Int(new_y))
-            DispatchQueue.main.async {
-                let locations : (x : Int, y : Int) = (Int(new_x), Int(new_y))
-                let increments : [(x : Int, y : Int)] = [(0, 1), (0, -1), (1, 0), (-1, 0)]
-                let conditions : [Bool] = [(y_diff >= 0.9), (y_diff <= 0.1), (x_diff >= 0.9), (x_diff <= 0.1)]
-                if !self.game.changePiecePosition(piece: selected, newPosition: (locations.x, locations.y)){
-                    for i in 0..<4{
-                        let current : (x : Int, y : Int) = (locations.x + increments[i].x, locations.y + increments[i].y)
-                        if conditions[i] && self.game.changePiecePosition(piece: selected, newPosition: current){
-                            break
-                        }
-                    }
-                }
-            }
-        }
-    }
-    
     //board is 8x8
     
     func initialize(){
-        self.game.boardDelegate = self
+        //self.game.boardDelegate = self
         self.setNeedsDisplay()
-        self.initTapGesture()
-        self.game.startGame()
+        initMoveTapGesture()
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -200,32 +174,39 @@ class UIBoard : UIView, ChessBoardDelegate, UIChessPieceProtocol{
         }
     }
 
-    func pieceDidChangePosition(piece: ChessPiece, oldPosition: (x: Int, y: Int)) {
+    private func initMoveTapGesture(){
+        let moveTap = UITapGestureRecognizer(target: self, action: #selector(handleTap))
+        self.addGestureRecognizer(moveTap)
+    }
+    
+    /*
+     Allow for the user to slightly tap outside and still get the move through, if it is within 10% of a square distance from
+     another box, try that other box too
+     */
+    
+    internal func handleTap(tap : UITapGestureRecognizer){
+        let tapLocation = tap.location(in: self)
+        //convert screen x and y to coordinate x and y
+        let new_x = (tapLocation.x / (self.frame.size.width / 8))
+        let new_y = (tapLocation.y / (self.frame.size.height / 8))
+        delegate?.moveRequested(newLocation: (Float(new_x), Float(new_y)))
+    }
+    
+    func pieceDidChangePosition(piece: ChessPiece, oldPosition: Point) {
         let new_frame = CGRect(x: xPoint(x: piece.x), y: yPoint(y: piece.y), width:frame.size.width / 8, height:frame.size.height / 8)
         if let existingPiece = pieces["\(oldPosition.x)\(oldPosition.y)"]{
             UIView.animate(withDuration: 0.5, animations: {
                 existingPiece.frame = new_frame
             })
-            existingPiece.Selected = false
             pieces["\(piece.x)\(piece.y)"] = existingPiece
         }else{
             print("Cannot find piece")
         }
         pieces.removeValue(forKey: "\(oldPosition.x)\(oldPosition.y)")
     }
-    
-    /*UIChessPieceProtocol*/
-    
+        
     internal func pieceSelected(piece: ChessPiece) {
-        if let selected = self.selectedPiece{
-            if !self.game.consumePiece(piece1: selected, piece2: piece){
-                self.selectedPiece = piece
-            }else{
-                self.selectedPiece = nil
-            }
-        }else{
-            self.selectedPiece = piece
-        }
+        delegate?.pieceTapped(piece: piece)
     }
 }
 

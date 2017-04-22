@@ -15,6 +15,9 @@ protocol SlidingMenuDelegate {
 
 class SlidingMenu: UIView, UITableViewDelegate, UITableViewDataSource{
     
+    static let cellIdentifier = "RegularCell"
+    static let switchIdentifier = "SwitchCell"
+    
     var delegate : SlidingMenuDelegate?
     
     private var table : UITableView?
@@ -83,17 +86,17 @@ class SlidingMenu: UIView, UITableViewDelegate, UITableViewDataSource{
  */
     
     func addSwitch(text : String, section : Int){
-        addElement(text: text, subtitle: "", section: section)
+        addElement(text: text, subtitle: "", kind : SlidingMenu.switchIdentifier, section: section)
     }
     
-    func addElement(text : String, subtitle : String, section : Int){
+    func addElement(text : String, subtitle : String, kind : String, section : Int){
         if section >= elements.count{
-            elements.append([(String, String)]())
+            elements.append([(String, String, String)]())
         }
-        elements[section].append((text, subtitle))
+        elements[section].append((text, subtitle, kind))
     }
     
-    private var elements = [[(text : String, subtitle : String)]](){
+    private var elements = [[(text : String, subtitle : String, kind : String)]](){
         didSet{
            table?.reloadData()
         }
@@ -121,7 +124,6 @@ class SlidingMenu: UIView, UITableViewDelegate, UITableViewDataSource{
         if let cell = (sender.superview as? UITableViewCell){
             if let cellPath = table?.indexPath(for: cell){
                 delegate?.switchChangedValue(sender: sender, i: cellPath)
-                hide()
             }
         }
     }
@@ -130,10 +132,10 @@ class SlidingMenu: UIView, UITableViewDelegate, UITableViewDataSource{
         let cell = UITableViewCell(style: .subtitle, reuseIdentifier: "elementCell")
         cell.textLabel?.text = elements[indexPath.section][indexPath.row].text
         cell.textLabel?.textAlignment = .right
-        let subtitle = elements[indexPath.section][indexPath.row].subtitle
-        if !subtitle.isEmpty{
-           cell.detailTextLabel?.text = subtitle
-        }else{
+        let current = elements[indexPath.section][indexPath.row]
+        if current.kind == SlidingMenu.cellIdentifier{
+           cell.detailTextLabel?.text = current.subtitle
+        }else if current.kind == SlidingMenu.switchIdentifier{
             let opt_switch = UISwitch(frame: CGRect(origin: CGPoint.zero, size: CGSize(width: 51.0, height: 31.0)))
             opt_switch.frame.origin = CGPoint(x: frame.size.width - opt_switch.frame.width - 10, y: (cell.frame.size.height / 2) - opt_switch.frame.size.height / 2)
             opt_switch.addTarget(self, action: #selector(handleValueChanged), for: .valueChanged)
@@ -145,8 +147,11 @@ class SlidingMenu: UIView, UITableViewDelegate, UITableViewDataSource{
     
     private func selectedRow(indexPath : IndexPath){
         table?.deselectRow(at: indexPath, animated: true)
-        delegate?.selectedIndex(i: indexPath, content: elements[indexPath.section][indexPath.row])
-        hide()
+        let current = elements[indexPath.section][indexPath.row]
+        delegate?.selectedIndex(i: indexPath, content: (current.text, current.subtitle))
+        if current.kind == SlidingMenu.cellIdentifier{
+            hide()
+        }
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {

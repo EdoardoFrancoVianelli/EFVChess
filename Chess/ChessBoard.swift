@@ -9,19 +9,38 @@
 import Foundation
 
 protocol ChessBoardDelegate {
-    func pieceDidChangePosition(piece : ChessPiece, oldPosition : (x : Int, y : Int))
+    func pieceDidChangePosition(piece : ChessPiece, oldPosition : Point)
     func pieceAdded(piece : ChessPiece)
     func pieceRemoved(piece : ChessPiece)
+}
+
+class Point : Hashable, Equatable{
+    var x = 0
+    var y = 0
+    
+    init(_ x : Int, _ y : Int){
+        self.x = x
+        self.y = y
+    }
+    
+    public var hashValue: Int {
+        return x * 10 + y * 100
+    }
+    
+    public static func ==(lhs: Point, rhs: Point) -> Bool
+    {
+        return (lhs.x, lhs.y) == (rhs.x, rhs.y)
+    }
 }
 
 class ChessBoard : ChessPieceDelegate {
     
     var player1Check : ChessPiece?{
-        return pieceVulnerable(piece: player1King).attacker
+        return pieceVulnerable(piece: player1King)
     }
     
     var player2Check : ChessPiece?{
-        return pieceVulnerable(piece: player2King).attacker
+        return pieceVulnerable(piece: player2King)
     }
     
     
@@ -51,8 +70,8 @@ class ChessBoard : ChessPieceDelegate {
     
     init(player1Name : String, player2Name : String){
         self.board = Dictionary<String, ChessPiece>()
-        self.player1King = King(x: 0, y: 0, movement: KingMovement(), player: Player(name: "", id: 1))
-        self.player2King = King(x: 0, y: 0, movement: KingMovement(), player: Player(name: "", id: 2))
+        self.player1King = King(origin: Point(0,0), movement: KingMovement(), player: Player(name: "", id: 1))
+        self.player2King = King(origin: Point(0,0), movement: KingMovement(), player: Player(name: "", id: 2))
     }
     
     func pieceCanEat(piece : ChessPiece, other : ChessPiece) -> Bool{
@@ -61,12 +80,20 @@ class ChessBoard : ChessPieceDelegate {
             return false
         }
         
-        let allowed  = changeAllowed(piece: piece, newPosition: other.origin, inclusive: false)
+        let allowed  = allowedMovementLocations(piece: piece).contains(where: { (p : Point) in
+            return Point(p.x,p.y) == other.origin
+        })// changeAllowed(piece: piece, newPosition: other.origin, inclusive: false)
         let can_move = movementPossible(piece: piece, newPosition: other.origin)
         if !allowed && can_move && piece is Pawn{
             return true
         }
         return allowed && can_move
+    }
+    
+    func canEscape(piece : ChessPiece, other : ChessPiece) -> Bool{
+        let piece1Locations = Set(allowedMovementLocations(piece: piece))
+        let piece2Locations = Set(allowedMovementLocations(piece: other))
+        return !(piece1Locations.subtracting(piece2Locations)).isEmpty
     }
     
     func pieceCanBeBlockedFromAttackingPiece(attacker : ChessPiece, attacked : ChessPiece) -> ChessPiece?{
@@ -103,32 +130,52 @@ class ChessBoard : ChessPieceDelegate {
         
         return nil
     }
-    /*
-    func allowedMovements(piece : ChessPiece){
-        var movements = [(x : Int, y : Int)]()
-        if piece is Pawn{
-            if piece.player.id == 1{
-                
-            }else if piece.player.id == 2{
-                
-            }
-        }else if piece is King{
-            
-        }else if piece is Rook{
-            
-        }else if piece is Queen{
-            
-        }else{ //Bishop
-            
-        }
-    }
- */
     
-    func pieceCanElude(_ piece : ChessPiece, otherPiece : ChessPiece){
+    func allowedMovementLocations(piece : ChessPiece) -> [Point]{
+        let pieceMovement = piece.allowedMovement
+        var locations = [Point]()
+
+        //left, right, up, down
         
+        let movements : [(max : Int, increments : (x : Int, y : Int))] = [(pieceMovement.left, (-1, 0)),
+                                                                                   (pieceMovement.right, (1, 0)),
+                                                                                   (pieceMovement.up, (0,-1)),
+                                                                                   (pieceMovement.down, (0, 1)),
+                                                                                   (pieceMovement.diagonal, (1, 1)),
+                                                                                   (pieceMovement.diagonal, (-1, -1)),
+                                                                                   (pieceMovement.diagonal, (-1, 1)),
+                                                                                   (pieceMovement.diagonal, (1, -1))]
+        for direction in movements{
+            var x = piece.x
+            var y = piece.y
+            for _ in 0..<direction.max{
+                while true{
+                    x += direction.increments.x
+                    y += direction.increments.y
+                    if !(x > 0 && x < 8 && y > 0 && y < 8){
+                        break
+                    }
+                    locations.append(Point(x, y))
+                }
+            }
+        }
+        
+        if piece is Knight{
+            let possible_locations : [Point] = [Point(piece.x - 1, piece.y - 2),
+                                                             Point(piece.x + 1, piece.y - 2),
+                                                             Point(piece.x - 1, piece.y + 2),
+                                                             Point(piece.x + 1, piece.y + 2)]
+            for location in possible_locations{
+                if location.x > 0 && location.x < 8 && location.y > 0 && location.y < 8{
+                    locations.append(location)
+                }
+            }
+        }
+        
+        return locations
     }
     
-    func pieceVulnerable(piece : ChessPiece) -> (attacker : ChessPiece?, locations : [(x : Int, y : Int)]){
+    func pieceVulnerable(piece : ChessPiece) -> ChessPiece? {
         
         let left_r_up_d = ["Left", "Right", "Up", "Down"]
         let lr_ud_increments  : [(x : Int, y : Int)] = [(-1, 0), (1,0), (0, -1), (0, 1)]
@@ -136,8 +183,7 @@ class ChessBoard : ChessPieceDelegate {
         //check left and right
         
         var attacker : ChessPiece?
-        var locations = [(x : Int, y : Int)]()
-        
+
         print(piece)
         
         for (index,increment) in lr_ud_increments.enumerated(){
@@ -151,9 +197,6 @@ class ChessBoard : ChessPieceDelegate {
                     continue
                 }
                 print("\(x),\(y)")
-                if movementPossible(piece: piece, newPosition: (x,y)){
-                    locations.append((x,y))
-                }
                 if let currentPiece = self.board["\(x)\(y)"]{
                     
                     //check if the current piece can consume the other piece
@@ -185,9 +228,6 @@ class ChessBoard : ChessPieceDelegate {
             var current : (x : Int, y : Int) = (piece.origin.x + increment.x, piece.origin.y + increment.y)
             print(diagonal_descr[i])
             while current.x >= 0 && current.x < 8 && current.y >= 0 && current.y < 8{
-                if movementPossible(piece: piece, newPosition: current){
-                    locations.append(current)
-                }
                 if let currentPiece = self.board["\(current.x)\(current.y)"]{
                                         
                     let y_diff = currentPiece.y - piece.y //if y is greater than 0, is is below, otherwise it is abow
@@ -208,11 +248,11 @@ class ChessBoard : ChessPieceDelegate {
             }
         }
         
-        return (attacker, locations)
+        return attacker
     }
     
-    private func CheckBetween(startLocation : (x : Int, y : Int),
-                                            endLocation : (x : Int, y : Int),
+    private func CheckBetween(startLocation : Point,
+                                            endLocation : Point,
                                             increments : (x : Int, y : Int)) -> Bool{
         
         var i = startLocation.x + increments.x
@@ -235,7 +275,7 @@ class ChessBoard : ChessPieceDelegate {
         return false
     }
     
-    private func movementPossible(piece : ChessPiece, newPosition : (x : Int, y : Int)) -> Bool{
+    private func movementPossible(piece : ChessPiece, newPosition : Point) -> Bool{
         let diagonal = abs(newPosition.x - piece.x) == abs(newPosition.y - piece.y)
         let vertical = piece.x - newPosition.x == 0 && newPosition.y != piece.y
         let sideways = piece.y - newPosition.y == 0 && newPosition.x != piece.x
@@ -263,23 +303,23 @@ class ChessBoard : ChessPieceDelegate {
         return false
     }
     
-    private func diagonalMovement(_ oldPosition : (x : Int, y : Int), _ newPosition : (x : Int, y : Int)) -> Bool{
+    private func diagonalMovement(_ oldPosition : Point, _ newPosition : Point) -> Bool{
         return abs(newPosition.x - oldPosition.x) == abs(newPosition.y - oldPosition.y)
     }
     
-    private func verticalMovement(_ oldPosition : (x : Int, y : Int), _ newPosition : (x : Int, y : Int)) -> Bool{
+    private func verticalMovement(_ oldPosition : Point, _ newPosition : Point) -> Bool{
         return oldPosition.x - newPosition.x == 0 && newPosition.y != oldPosition.y
     }
     
-    private func sidewaysMovement(_ oldPosition : (x : Int, y : Int), _ newPosition : (x : Int, y : Int)) -> Bool{
+    private func sidewaysMovement(_ oldPosition : Point, _ newPosition : Point) -> Bool{
         return oldPosition.y - newPosition.y == 0 && newPosition.x != oldPosition.x
     }
     
-    private func validKnightMovement(piece : ChessPiece, newPosition : (x : Int, y : Int)) -> Bool{
+    private func validKnightMovement(piece : ChessPiece, newPosition : Point) -> Bool{
         return (abs(piece.x - newPosition.x) == 2 && abs(piece.y - newPosition.y) == 1) || (abs(piece.y - newPosition.y) == 2 && abs(piece.x - newPosition.x) == 1)
     }
     
-    private func changeAllowed(piece : ChessPiece, newPosition : (x : Int, y : Int), inclusive : Bool) -> Bool{
+    private func changeAllowed(piece : ChessPiece, newPosition : Point, inclusive : Bool) -> Bool{
         
         //check based on the allowable movements
         
@@ -292,9 +332,9 @@ class ChessBoard : ChessPieceDelegate {
             y_inc = 0
         }
         
-        let end = !inclusive ? newPosition : (newPosition.x + x_inc, newPosition.y + y_inc)
+        let end = !inclusive ? newPosition : Point(newPosition.x + x_inc, newPosition.y + y_inc)
         
-        let interference = CheckBetween(startLocation: (piece.x, piece.y), endLocation: end, increments: (x_inc, y_inc))
+        let interference = CheckBetween(startLocation: Point(piece.x, piece.y), endLocation: end, increments: (x_inc, y_inc))
         var allowed = false
         
         if diagonalMovement(piece.origin, newPosition) && !(piece is Knight){ //diagonal
@@ -305,13 +345,13 @@ class ChessBoard : ChessPieceDelegate {
         }else if verticalMovement(piece.origin, newPosition){ //going straight up or down
             let diff = piece.y - newPosition.y
             if (piece is Pawn){
-                return (piece.allowedMovement.canMoveDirectlyForward && abs(diff) <= piece.allowedMovement.forward && !interference)
+                return (piece.allowedMovement.canMoveDirectlyForward && abs(diff) <= piece.allowedMovement.up && !interference)
             }else{
                 if diff < 0{ //going backwards
-                    return piece.allowedMovement.canMoveDirectlyBackwards && abs(diff) <= piece.allowedMovement.backwards && !interference
+                    return piece.allowedMovement.canMoveDirectlyBackwards && abs(diff) <= piece.allowedMovement.down && !interference
                 }
                 else{
-                    return piece.allowedMovement.canMoveDirectlyForward   && abs(diff) <= piece.allowedMovement.forward   && !interference
+                    return piece.allowedMovement.canMoveDirectlyForward   && abs(diff) <= piece.allowedMovement.up && !interference
                 }
             }
         }else if sidewaysMovement(piece.origin, newPosition) { //going straight left or right
@@ -330,11 +370,22 @@ class ChessBoard : ChessPieceDelegate {
         return allowed
     }
     
-    func canChangePiecePosition(piece : ChessPiece, newPosition : (x : Int, y : Int)) -> Bool{
+    func canChangePiecePosition(piece : ChessPiece, newPosition : Point) -> Bool{
         
         //verify legitimacy of position change
         
+        /*
         if !changeAllowed(piece: piece, newPosition: newPosition, inclusive: true){
+            print("Cannot move \(piece) to \(newPosition)")
+            print(self.board.count)
+            return false
+        }
+         */
+        
+        let locations = allowedMovementLocations(piece: piece)
+        if !(locations.contains(where: { element in
+            return element == newPosition
+        })){
             print("Cannot move \(piece) to \(newPosition)")
             print(self.board.count)
             return false
@@ -347,7 +398,7 @@ class ChessBoard : ChessPieceDelegate {
         return true
     }
     
-    func positionDidChange(piece: ChessPiece, oldPosition : (x : Int, y : Int)) {
+    func positionDidChange(piece: ChessPiece, oldPosition : Point) {
         
         self.board.removeValue(forKey: "\(oldPosition.x)\(oldPosition.y)")
         self.board["\(piece.x)\(piece.y)"] = piece
@@ -372,6 +423,10 @@ class ChessBoard : ChessPieceDelegate {
     func removePiece(piece : ChessPiece){
         self.board.removeValue(forKey: "\(piece.x)\(piece.y)")
         self.delegate?.pieceRemoved(piece: piece)
+    }
+    
+    func pieceAt(x : Int, y : Int) -> ChessPiece?{
+        return self.board["\(x)\(y)"]
     }
 }
 

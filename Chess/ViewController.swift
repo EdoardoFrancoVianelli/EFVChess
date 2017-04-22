@@ -11,8 +11,6 @@ import AVFoundation
 
 //wood texture from http://www.psdgraphics.com/file/wood-texture.jpg
 
-let SoundOnSetting = "SoundOn"
-
 class ViewController: UIViewController, GameDelegate, SlidingMenuDelegate, StatusBoxDelegate {
 
     var gameOver : Bool = false
@@ -28,6 +26,10 @@ class ViewController: UIViewController, GameDelegate, SlidingMenuDelegate, Statu
     
     @IBOutlet weak var board: UIBoard!
     @IBOutlet weak var statusLabel: UILabel!
+    
+    var game : Game!
+    
+    var timer : Timer?
     
     func updateStatusLabel(){
         statusLabel.text = "\(currentPlayer.name)'s turn"
@@ -68,14 +70,8 @@ class ViewController: UIViewController, GameDelegate, SlidingMenuDelegate, Statu
         }
     }
     
-    func SetNoise(on : Bool){
-        UserDefaults.standard.set(on, forKey: SoundOnSetting)
-    }
-    
     func pieceMoved(piece: ChessPiece) {
-        if let soundOn = UserDefaults.standard.object(forKey: SoundOnSetting) as? Bool{
-            if soundOn { playTap() }
-        }else{
+        if Settings.soundOn {
             playTap()
         }
         if currentPlayer.id == 1{
@@ -86,8 +82,12 @@ class ViewController: UIViewController, GameDelegate, SlidingMenuDelegate, Statu
     }
     
     func switchChangedValue(sender: UISwitch, i: IndexPath) {
-        print("Sound \(sender.isOn ? "on" : "off")")
-        SetNoise(on: sender.isOn)
+        if i.row == 0{
+            print("Sound \(sender.isOn ? "on" : "off")")
+            Settings.soundOn = sender.isOn
+        }else{
+            
+        }
     }
     
     func selectedIndex(i: IndexPath, content: (text: String, subtitle: String)) {
@@ -110,7 +110,7 @@ class ViewController: UIViewController, GameDelegate, SlidingMenuDelegate, Statu
         
         gameStartAlert.addAction(UIAlertAction(title: "OK", style: .default, handler: {
         
-            (action : UIAlertAction) in self.board.startGame()
+            (action : UIAlertAction) in self.game.startGame()
         
         }))
         present(gameStartAlert, animated: true, completion: nil)
@@ -120,7 +120,7 @@ class ViewController: UIViewController, GameDelegate, SlidingMenuDelegate, Statu
         let _ = self.navigationController?.popViewController(animated: true)
     }
     
-    var selectedPiece : ChessPiece = ChessPiece(x: 0, y: 0, movement: PawnMovement(), player: Player(name: "", id: 1)){
+    var selectedPiece : ChessPiece = ChessPiece(origin: Point(0,0), movement: PawnMovement(), player: Player(name: "", id: 1)){
         didSet{
             let image = pieceImages[selectedPiece.name]!
             if (self.currentPlayer.id == 1 && selectedPiece.player.id == 1){
@@ -140,28 +140,30 @@ class ViewController: UIViewController, GameDelegate, SlidingMenuDelegate, Statu
     
     func configureSlideMenu(){
         slidingMenu = SlidingMenu(sp: self.view)
-        slidingMenu?.addElement(text: "New Game", subtitle: "Start a new game", section: 0)
-        slidingMenu?.addElement(text: "End Game", subtitle: "Quit the current game", section: 0)
-        slidingMenu?.addElement(text: "Deleted pieces", subtitle: "See the game's deleted pieces", section: 0)
+        slidingMenu?.addElement(text: "New Game", subtitle: "Start a new game", kind: SlidingMenu.cellIdentifier, section: 0)
+        slidingMenu?.addElement(text: "End Game", subtitle: "Quit the current game", kind: SlidingMenu.cellIdentifier, section: 0)
+        slidingMenu?.addElement(text: "Deleted pieces", subtitle: "See the game's deleted pieces", kind: SlidingMenu.cellIdentifier, section: 0)
         slidingMenu?.addHeader(name: "Settings")
         slidingMenu?.addSwitch(text: "Sound", section: 1)
+        slidingMenu?.addSwitch(text: "Keyboard Rotation", section: 1)
         slidingMenu?.addHeader(name: "Other")
-        slidingMenu?.addElement(text: "Main Menu", subtitle: "Go back to main menu", section: 2)
+        slidingMenu?.addElement(text: "Main Menu", subtitle: "Go back to main menu", kind: SlidingMenu.cellIdentifier, section: 2)
         slidingMenu?.delegate = self
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.configureSlideMenu()
-        self.board.game.delegate = self
-        self.currentPlayer = Player(name: firstPlayerName, id: 1)
-        self.board.game.setPlayerNames(p1: firstPlayerName, p2: secondPlayerName)
-        let timer = Timer(timeInterval: 1.0, repeats: true, block: timeTicked)
-        RunLoop.current.add(timer, forMode: .defaultRunLoopMode)
         
+        game = Game(p1: Player(name: firstPlayerName, id: 1), p2: Player(name: secondPlayerName, id: 2))
+        game.gameDelegate = self
+        game.boardDelegate = board
+        
+        self.configureSlideMenu()
         self.player1Box.delegate = self
         self.player2Box.delegate = self
-        
+        self.board.delegate = game
+                
+        game.startGame()
         // Do any additional setup after loading the view, typically from a nib.
     }
     
@@ -207,6 +209,7 @@ class ViewController: UIViewController, GameDelegate, SlidingMenuDelegate, Statu
             }
         }
         self.currentPlayer = player
+        self.board.rotate()
     }
     
     func pieceSelected(piece: ChessPiece) {
@@ -214,7 +217,22 @@ class ViewController: UIViewController, GameDelegate, SlidingMenuDelegate, Statu
     }
     
     func gameStarted() {
-        self.statusLabel.text = ""
+        
+        timer?.invalidate()
+        
+        if self.currentPlayer.id == 2{
+            
+        }
+        
+        self.statusLabel.text = firstPlayerName + "'s turn"
+        self.currentPlayer = Player(name: firstPlayerName, id: 1)
+        game.setPlayerNames(p1: firstPlayerName, p2: secondPlayerName)
+        
+        self.player1Box.resetSeconds()
+        self.player2Box.resetSeconds()
+        
+        timer = Timer(timeInterval: 1.0, repeats: true, block: timeTicked)
+        RunLoop.current.add(timer!, forMode: .defaultRunLoopMode)
     }
     
     internal func gameOver(loser: Player) {
@@ -230,21 +248,21 @@ class ViewController: UIViewController, GameDelegate, SlidingMenuDelegate, Statu
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if let dest = (segue.destination as? DeletedPiecesTableViewController){
-            dest.first_player = board.game.firstPlayer
-            dest.second_player = board.game.secondPlayer
-            dest.first_pieces = board.game.player1Deleted
-            dest.second_pieces = board.game.player2Deleted
+            dest.first_player = game.firstPlayer
+            dest.second_player = game.secondPlayer
+            dest.first_pieces = game.player1Deleted
+            dest.second_pieces = game.player2Deleted
         }
     }
     
     //MARK: Status Box Delegate
     
     func cancelActionFired() {
-        self.board.game.undoPendingMove()
+        game.undoPendingMove()
     }
     
     func confirmActionFired() {
-        self.board.game.confirmPendingMove()
+        game.confirmPendingMove()
     }
 }
 

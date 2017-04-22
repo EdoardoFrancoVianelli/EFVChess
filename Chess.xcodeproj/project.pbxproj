@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		A805F2401E75F8E7005E0B78 /* Move.swift in Sources */ = {isa = PBXBuildFile; fileRef = A805F23F1E75F8E7005E0B78 /* Move.swift */; };
+		A8389C1A1EA3504100A22EA5 /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8389C191EA3504100A22EA5 /* Settings.swift */; };
 		A8531DEA1E405F4B004D553F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8531DE91E405F4B004D553F /* AppDelegate.swift */; };
 		A8531DEC1E405F4B004D553F /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8531DEB1E405F4B004D553F /* ViewController.swift */; };
 		A8531DEF1E405F4B004D553F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A8531DED1E405F4B004D553F /* Main.storyboard */; };
@@ -35,6 +36,7 @@
 		A8531E451E55073B004D553F /* wood-texture.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A8531E441E55073B004D553F /* wood-texture.jpg */; };
 		A8531E471E550B6E004D553F /* ChessStatusBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8531E461E550B6E004D553F /* ChessStatusBox.swift */; };
 		A8B1FA631E60E991008F2E76 /* SlidingMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8B1FA621E60E991008F2E76 /* SlidingMenu.swift */; };
+		A8B539DC1E8C692F00FB0153 /* TransparentMessageBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8B539DB1E8C692F00FB0153 /* TransparentMessageBox.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -56,6 +58,7 @@
 
 /* Begin PBXFileReference section */
 		A805F23F1E75F8E7005E0B78 /* Move.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Move.swift; sourceTree = "<group>"; };
+		A8389C191EA3504100A22EA5 /* Settings.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Settings.swift; sourceTree = "<group>"; };
 		A8531DE61E405F4B004D553F /* Chess.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Chess.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A8531DE91E405F4B004D553F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		A8531DEB1E405F4B004D553F /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -89,6 +92,7 @@
 		A8531E441E55073B004D553F /* wood-texture.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "wood-texture.jpg"; sourceTree = "<group>"; };
 		A8531E461E550B6E004D553F /* ChessStatusBox.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChessStatusBox.swift; sourceTree = "<group>"; };
 		A8B1FA621E60E991008F2E76 /* SlidingMenu.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SlidingMenu.swift; sourceTree = "<group>"; };
+		A8B539DB1E8C692F00FB0153 /* TransparentMessageBox.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransparentMessageBox.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -175,6 +179,8 @@
 				A8531E461E550B6E004D553F /* ChessStatusBox.swift */,
 				A8B1FA621E60E991008F2E76 /* SlidingMenu.swift */,
 				A805F23F1E75F8E7005E0B78 /* Move.swift */,
+				A8B539DB1E8C692F00FB0153 /* TransparentMessageBox.swift */,
+				A8389C191EA3504100A22EA5 /* Settings.swift */,
 			);
 			path = Chess;
 			sourceTree = "<group>";
@@ -382,9 +388,11 @@
 				A8531E471E550B6E004D553F /* ChessStatusBox.swift in Sources */,
 				A8531DEA1E405F4B004D553F /* AppDelegate.swift in Sources */,
 				A8531E261E4BFAE6004D553F /* GameSelectionTableViewController.swift in Sources */,
+				A8389C1A1EA3504100A22EA5 /* Settings.swift in Sources */,
 				A8531E351E4E3DAD004D553F /* DeletedPiecesTableViewController.swift in Sources */,
 				A8531E181E405F61004D553F /* ChessPiece.swift in Sources */,
 				A8531E371E52FBA6004D553F /* PlayerOptionsViewController.swift in Sources */,
+				A8B539DC1E8C692F00FB0153 /* TransparentMessageBox.swift in Sources */,
 				A8B1FA631E60E991008F2E76 /* SlidingMenu.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
