@@ -85,8 +85,15 @@ class ViewController: UIViewController, GameDelegate, SlidingMenuDelegate, Statu
         if i.row == 0{
             print("Sound \(sender.isOn ? "on" : "off")")
             Settings.soundOn = sender.isOn
-        }else{
-            
+        }else if i.row == 1{
+            print("Rotate keyboard \(sender.isOn ? "on" : "off")")
+            Settings.rotateKeyboard = sender.isOn
+        }else if i.row == 2{
+            print("Allowed Moves \(sender.isOn ? "on" : "off")")
+            Settings.allowedMoves = sender.isOn
+        }else if i.row == 2{
+            print("Animations \(sender.isOn ? "on" : "off")")
+            Settings.animations = sender.isOn
         }
     }
     
@@ -146,6 +153,8 @@ class ViewController: UIViewController, GameDelegate, SlidingMenuDelegate, Statu
         slidingMenu?.addHeader(name: "Settings")
         slidingMenu?.addSwitch(text: "Sound", section: 1)
         slidingMenu?.addSwitch(text: "Keyboard Rotation", section: 1)
+        slidingMenu?.addSwitch(text: "Allowed moves", section: 1)
+        slidingMenu?.addSwitch(text: "Animations", section: 1)
         slidingMenu?.addHeader(name: "Other")
         slidingMenu?.addElement(text: "Main Menu", subtitle: "Go back to main menu", kind: SlidingMenu.cellIdentifier, section: 2)
         slidingMenu?.delegate = self
@@ -164,6 +173,13 @@ class ViewController: UIViewController, GameDelegate, SlidingMenuDelegate, Statu
         self.board.delegate = game
                 
         game.startGame()
+        
+        slidingMenu?.show()
+        
+        UIView.animate(withDuration: 1, animations: {
+            self.slidingMenu?.hide()
+        })
+        
         // Do any additional setup after loading the view, typically from a nib.
     }
     
@@ -171,7 +187,6 @@ class ViewController: UIViewController, GameDelegate, SlidingMenuDelegate, Statu
         if gameOver{
             timer.invalidate()
         }
-        //report_memory()
         if currentPlayer.id == 1{
             player1Box.secondsPassed += 1
         }else{
@@ -186,15 +201,15 @@ class ViewController: UIViewController, GameDelegate, SlidingMenuDelegate, Statu
     
     internal func playerInCheck(player: Player) {
         
-        UIView.animate(withDuration: 0.5, delay: 0.0, options: UIViewAnimationOptions.curveEaseOut, animations: {
-            
-            self.statusLabel.alpha = 0.0
-            
-        }, completion: { (completed : Bool) in
-            if completed{
-                self.statusLabel.alpha = 1.0
-            }
-        })
+        if Settings.animations{
+            UIView.animate(withDuration: 0.5, delay: 0.0, options: UIViewAnimationOptions.curveEaseOut, animations: {
+                self.statusLabel.alpha = 0.0
+            }, completion: { (completed : Bool) in
+                if completed{
+                    self.statusLabel.alpha = 1.0
+                }
+            })
+        }
         
         statusLabel.text = "\(currentPlayer.name)'s turn"
         self.statusLabel.text?.append(" -> in Check!")
@@ -209,7 +224,10 @@ class ViewController: UIViewController, GameDelegate, SlidingMenuDelegate, Statu
             }
         }
         self.currentPlayer = player
-        self.board.rotate()
+        
+        if Settings.rotateKeyboard{
+            self.board.rotate()
+        }
     }
     
     func pieceSelected(piece: ChessPiece) {
@@ -219,10 +237,6 @@ class ViewController: UIViewController, GameDelegate, SlidingMenuDelegate, Statu
     func gameStarted() {
         
         timer?.invalidate()
-        
-        if self.currentPlayer.id == 2{
-            
-        }
         
         self.statusLabel.text = firstPlayerName + "'s turn"
         self.currentPlayer = Player(name: firstPlayerName, id: 1)

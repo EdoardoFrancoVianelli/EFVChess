@@ -20,6 +20,29 @@ protocol GameDelegate {
 
 class Game : UIBoardDelegate{
     
+    private var player1King : King
+    private var player2King : King
+    
+    var firstPlayerKing : ChessPiece {
+        get{
+            return player1King
+        }
+    }
+    
+    var secondPlayerKing : ChessPiece{
+        get{
+            return player2King
+        }
+    }
+    
+    var player1Check : ChessPiece?{
+        return pieceVulnerable(piece: player1King)
+    }
+    
+    var player2Check : ChessPiece?{
+        return pieceVulnerable(piece: player2King)
+    }
+    
     private var pendingMove : Move?
     
     var gameOver : Bool = false{
@@ -70,6 +93,9 @@ class Game : UIBoardDelegate{
         self._player1 = p1
         self._player2 = p2
         self.currentTurn = p1
+        
+        self.player1King = King(origin: Point(0,0), movement: KingMovement(), player: Player(name: "", id: 1))
+        self.player2King = King(origin: Point(0,0), movement: KingMovement(), player: Player(name: "", id: 2))
     }
     
     var firstPlayerTurn : Bool{
@@ -100,8 +126,8 @@ class Game : UIBoardDelegate{
     func verifyCheckMate(p : Player, attackingPiece : ChessPiece, attacked : ChessPiece){ //check if the current player is in checkmate
         //checkmate if the attacking piece cannot be blocked or eaten
         
-        let kingAttacker = board.pieceVulnerable(piece: attackingPiece)
-        let blockingPiece = board.pieceCanBeBlockedFromAttackingPiece(attacker: attackingPiece, attacked: attacked)
+        let kingAttacker = pieceVulnerable(piece: attackingPiece)
+        let blockingPiece = pieceCanBeBlockedFromAttackingPiece(attacker: attackingPiece, attacked: attacked)
         
         if ( kingAttacker == nil && blockingPiece == nil){
             //game over
@@ -112,9 +138,6 @@ class Game : UIBoardDelegate{
     func undoPendingMove(){
         if let pending = pendingMove{
             pending.piece.origin = pending.previousLocation
-            if let pawn = pending.piece as? Pawn{
-                (pawn.allowedMovement as! PawnMovement).movedTwo = false
-            }
             if let consumed = pending.consumedPiece{
                 self.board.addPiece(piece: consumed)
             }
@@ -123,9 +146,16 @@ class Game : UIBoardDelegate{
     }
     
     func confirmPendingMove(){
-        if let pending = pendingMove{
+        if let pending = self.pendingMove{
+            if let pawn = pending.piece as? Pawn{
+                let movement = pawn.allowedMovement as! PawnMovement
+                let up = movement.up == 2 ? 1 : 0
+                let down = movement.down == 2 ? 1 : 0
+                movement.setUpDown(up: up, down: down)
+            }
+            pending.piece.setMoves(moves: allowedMovementLocations(piece: pending.piece))
             self.switchTurns(moved: pending.piece, oldPosition: pending.previousLocation, pieceRemoved: pending.consumedPiece)
-            pendingMove = nil
+            self.pendingMove = nil
         }
     }
     
@@ -138,25 +168,28 @@ class Game : UIBoardDelegate{
         
         if gameOver { return }
         
-        if let attacker = (currentTurn == _player1) ? board.player1Check : board.player2Check{
-            let king     = (currentTurn == _player1) ? board.firstPlayerKing : board.secondPlayerKing
+        if let attacker = (currentTurn == _player1) ? player1Check : player2Check{
+            let king     = (currentTurn == _player1) ? firstPlayerKing : secondPlayerKing
             playerInCheck(p: currentTurn, moved: moved, oldPosition: oldPosition, consumedPiece: pieceRemoved)
             verifyCheckMate(p: currentTurn, attackingPiece: attacker, attacked: king)
             if pieceRemoved != nil{
                 board.addPiece(piece: pieceRemoved!)
             }
             return
+        }else if remainingPiecesDraw() {//move has been completed, check for a draw
+            gameOver = true
         }
         self.switchTurns()
     }
-    
-    
     
     func pieceDeselected(){
         gameDelegate?.pieceDeselected()
     }
     
     func pieceSelected(piece : ChessPiece){
+        if piece.Moves.isEmpty{
+            piece.setMoves(moves: allowedMovementLocations(piece: piece))
+        }
         gameDelegate?.pieceSelected(piece: piece)
     }
     
@@ -184,38 +217,24 @@ class Game : UIBoardDelegate{
             return false
         }
         let oldPosition = piece.origin
-        let diff = piece.y - newPosition.y
-        if self.board.canChangePiecePosition(piece: piece, newPosition: newPosition){
-            
-            /*Avoid pawn moving backwards*/
-            
-            if piece is Pawn{
-                
-                if diff > 0 && !firstPlayerTurn || (diff < 0 && firstPlayerTurn){ //direction is downward
-                    return false
-                }
-            }
-            
+        if self.canChangePiecePosition(piece: piece, newPosition: newPosition){
             piece.origin = Point(newPosition.x, newPosition.y)
             self.pieceMoved(piece: piece, previousLocation: oldPosition, consumedPiece: nil)
             return true
-        }else{
-            if let pawn = piece as? Pawn{
-                if !(pawn.allowedMovement as! PawnMovement).movedTwo &&
-                    abs(diff) == 2 &&
-                    piece.player == currentPlayer &&
-                    abs(piece.x - newPosition.x) == 0{
-                    (piece.allowedMovement as! PawnMovement).movedTwo = true
-                    pawn.origin = newPosition
-                    self.pieceMoved(piece: pawn, previousLocation: oldPosition, consumedPiece: nil)
-                    return true
-                }
-            }
         }
         return false
     }
     
     func addPiece(piece : ChessPiece){
+        
+        if let king = piece as? King{
+            if piece.player.id == 1{
+                player1King = king
+            }else{
+                player2King = king
+            }
+        }
+        
         self.board.addPiece(piece: piece)
     }
     
@@ -227,7 +246,7 @@ class Game : UIBoardDelegate{
     
     func consume(piece1 : ChessPiece, piece2 : ChessPiece) -> ChessPiece?{
         
-        if self.board.pieceCanEat(piece: piece1, other: piece2){
+        if pieceCanEat(piece: piece1, other: piece2){
             self.board.removePiece(piece: piece2)
             piece1.origin = Point(piece2.x, piece2.y)
             return piece2
@@ -270,13 +289,13 @@ class Game : UIBoardDelegate{
     }
     
     private func initPawns(){
-        let p1_move = PawnMovement()
-        p1_move.setUpDown(up: 1, down: 0)
-        let p2_move = PawnMovement()
-        p1_move.setUpDown(up: 0, down: 1)
         for i in 0..<8{
-            board.addPiece(piece: Pawn(origin: Point(i,1), movement: p1_move, player: secondPlayer))
-            board.addPiece(piece: Pawn(origin: Point(i,6), movement: p2_move, player: firstPlayer))
+            let p1_move = PawnMovement()
+            p1_move.setUpDown(up: 2, down: 0)
+            let p2_move = PawnMovement()
+            p2_move.setUpDown(up: 0, down: 2)
+            board.addPiece(piece: Pawn(origin: Point(i,1), movement: p2_move, player: secondPlayer))
+            board.addPiece(piece: Pawn(origin: Point(i,6), movement: p1_move, player: firstPlayer))
         }
     }
     
@@ -334,14 +353,261 @@ class Game : UIBoardDelegate{
         }
     }
     
-    func pieceTapped(piece: ChessPiece) {
+    func pieceTapped(piece: ChessPiece) -> [Point]{
         if piece.player.id == currentTurn.id{
             self.selected = piece
-        }else{ //an attack on an opposing player's piece
-             if let selectedPiece = self.selected{
-                 let _ = self.consumePiece(piece1: selectedPiece, piece2: piece)
-             }
+            return piece.Moves
+        }else if let selectedPiece = self.selected{ //an attack on an opposing player's piece
+             let _ = self.consumePiece(piece1: selectedPiece, piece2: piece)
         }
+        return [Point]()
+    }
+    
+    //MARK: Game Logic
+    
+    /*
+    The game is immediately drawn when there is no possibility of checkmate for either side with any series of legal moves. This draw is often due to insufficient material, including the endgames
+    king against king;
+    king against king and bishop;
+    king against king and knight;
+    king and bishop against king and bishop, with both bishops on squares of the same color (see Checkmate#Unusual mates).[18]
+     */
+    
+    func remainingPiecesDraw() -> Bool{
+        
+        if board.pieces.count >= 2 && board.pieces.count <= 4{
+            var remaining = Dictionary<String, Int>()
+            for piece in board.pieces{
+                let name = piece.value.name
+                remaining[name] = remaining.index(forKey: name) == nil ? 0 : remaining[name]! + 1
+            }
+            
+            //king against king;
+            if remaining.count == 2 && remaining[King().name] == 2{
+                return true
+            }else if remaining.count == 3 && remaining[King().name] == 2{
+                if remaining[Bishop().name] == 1{ //king against king and bishop;
+                    return true
+                }else if remaining[Knight().name] == 1{ //king against king and knight;
+                    return true
+                }
+            }
+        }
+        return false
+    }
+    
+    func pieceCanEat(piece : ChessPiece, other : ChessPiece) -> Bool{
+        
+        if piece.player == other.player{
+            return false
+        }
+        
+        let allowed  = allowedMovementLocations(piece: piece).contains(where: { (p : Point) in
+            return Point(p.x,p.y) == other.origin
+        })// changeAllowed(piece: piece, newPosition: other.origin, inclusive: false)
+        let can_move = movementPossible(piece: piece, newPosition: other.origin)
+        if !allowed && can_move && piece is Pawn{
+            return true
+        }
+        return allowed && can_move
+    }
+    
+    //can we escape from the current piece? And can we find a location where
+    //we won't be in check?
+    
+    func canEscape(piece : ChessPiece, other : ChessPiece) -> Bool{
+        let piece1Locations = Set(allowedMovementLocations(piece: piece))
+        let piece2Locations = Set(allowedMovementLocations(piece: other))
+        let subtraction = piece1Locations.subtracting(piece2Locations)
+        return !subtraction.isEmpty
+    }
+    
+    func pieceCanBeBlockedFromAttackingPiece(attacker : ChessPiece, attacked : ChessPiece) -> ChessPiece?{
+        
+        let attackLocations = Set(allowedMovementLocations(piece: attacker))
+        
+        for (_, piece) in self.board.pieces{
+            if piece.player == attacked.player{
+                let pieceLocations = Set(allowedMovementLocations(piece: piece))
+                if !attackLocations.intersection(pieceLocations).isEmpty{
+                    return piece
+                }
+            }
+        }
+        
+        return nil
+    }
+    
+    func allowedMovementLocations(piece : ChessPiece) -> [Point]{
+        let pieceMovement = piece.allowedMovement
+        var locations = [Point]()
+        
+        //left, right, up, down
+        
+        let movements : [(max : Int, increments : (x : Int, y : Int))] = [(pieceMovement.left, (-1, 0)),
+                                                                          (pieceMovement.right, (1, 0)),
+                                                                          (pieceMovement.up, (0,-1)),
+                                                                          (pieceMovement.down, (0, 1)),
+                                                                          (pieceMovement.diagonal, (1, 1)),
+                                                                          (pieceMovement.diagonal, (-1, -1)),
+                                                                          (pieceMovement.diagonal, (-1, 1)),
+                                                                          (pieceMovement.diagonal, (1, -1))]
+        for direction in movements{
+            var x = piece.x
+            var y = piece.y
+            for _ in 0..<direction.max{
+                x += direction.increments.x
+                y += direction.increments.y
+                if x < 0 || y < 0 || y > 7 || x > 7{ //!(x >= 0 && x < 8 && y >= 0 && y < 8){
+                    break
+                }
+                //check if there is something in the way
+                if self.board.pieces["\(x)\(y)"] == nil{
+                    locations.append(Point(x, y))
+                }
+                else if let inTheWay = self.board.pieceAt(x: x, y: y){
+                    if inTheWay.player != piece.player && !(piece is Pawn){ //if it is an opposing player, add it because we can capture it,
+                        //unless it's a pawn at it can only capture diagonally
+                        locations.append(Point(x,y))
+                    }
+                    break
+                }
+            }
+        }
+        
+        if piece is Knight{
+            let possible_locations : [Point] = [Point(piece.x - 1, piece.y - 2),
+                                                Point(piece.x + 1, piece.y - 2),
+                                                Point(piece.x - 1, piece.y + 2),
+                                                Point(piece.x + 1, piece.y + 2)]
+            for location in possible_locations{
+                if location.x >= 0 && location.x < 8 && location.y >= 0 && location.y < 8{
+                    if !self.board.hasPieceAtPoint(point: location){
+                        locations.append(location)
+                    }
+                }
+            }
+        }
+        
+        return locations
+    }
+    
+    func canChangePiecePosition(piece : ChessPiece, newPosition : Point) -> Bool{
+        
+        //verify legitimacy of position change
+        let locations = piece.Moves// allowedMovementLocations(piece: piece)
+        if !(locations.contains(where: { element in
+            return element == newPosition
+        })){
+            print("Cannot move \(piece) to \(newPosition)")
+            return false
+        }
+        
+        return true
+    }
+    
+    private func movementPossible(piece : ChessPiece, newPosition : Point) -> Bool{
+        let diagonal = abs(newPosition.x - piece.x) == abs(newPosition.y - piece.y)
+        let vertical = piece.x - newPosition.x == 0 && newPosition.y != piece.y
+        let sideways = piece.y - newPosition.y == 0 && newPosition.x != piece.x
+        if (piece is Rook){
+            return sideways || vertical
+        }else if (piece is Pawn){
+            return abs(newPosition.x - piece.x) == 1 && abs(newPosition.y - piece.y) == 1
+        }else if (piece is King || piece is Queen){
+            return diagonal || vertical || sideways
+        }else if (piece is Bishop){
+            return diagonal
+        }else if (piece is Knight){
+            var allowed = false
+            if abs(piece.x - newPosition.x) == 2{
+                if abs(piece.y - newPosition.y) == 1{
+                    allowed = piece is Knight
+                }
+            }else if abs(piece.y - newPosition.y) == 2{
+                if abs(piece.x - newPosition.x) == 1{
+                    allowed = piece is Knight
+                }
+            }
+            return allowed
+        }
+        return false
+    }
+    
+    func pieceVulnerable(piece : ChessPiece) -> ChessPiece? {
+        
+        let left_r_up_d = ["Left", "Right", "Up", "Down"]
+        let lr_ud_increments  : [(x : Int, y : Int)] = [(-1, 0), (1,0), (0, -1), (0, 1)]
+        
+        //check left and right
+        
+        var attacker : ChessPiece?
+        
+        print(piece)
+        
+        for (index,increment) in lr_ud_increments.enumerated(){
+            var x = piece.x
+            var y = piece.y
+            print(left_r_up_d[index])
+            for i in 0..<8{
+                x += increment.x
+                y += increment.y
+                if (i == piece.x && index == 0) || (i == piece.y && index == 0){
+                    continue
+                }
+                print("\(x),\(y)")
+                if let currentPiece = self.board.pieces["\(x)\(y)"]{
+                    
+                    //check if the current piece can consume the other piece
+                    
+                    let x_diff = abs(piece.x - currentPiece.x)
+                    let y_diff = abs(piece.y - currentPiece.y)
+                    
+                    if piece.player == currentPiece.player{
+                        break
+                    }
+                    
+                    if (currentPiece is Queen || currentPiece is Rook) && ((x_diff == 0 && y_diff > 0) || (y_diff == 0 && x_diff > 0)){
+                        attacker = currentPiece
+                    }else if currentPiece is King && (x_diff <= 1 && y_diff <= 1){
+                        attacker = currentPiece
+                    }
+                    
+                    break;
+                }
+            }
+        }
+        
+        //check diagonals
+        
+        let diagonal_descr = ["Lower right", "Upper left", "Upper right", "Lower left"]
+        let increments : [(x : Int, y : Int)] = [(1,1), (-1, -1), (1,-1), (-1, 1)]
+        
+        for (i, increment) in increments.enumerated(){
+            var current : (x : Int, y : Int) = (piece.origin.x + increment.x, piece.origin.y + increment.y)
+            print(diagonal_descr[i])
+            while current.x >= 0 && current.x < 8 && current.y >= 0 && current.y < 8{
+                if let currentPiece = self.board.pieces["\(current.x)\(current.y)"]{
+                    
+                    let y_diff = currentPiece.y - piece.y //if y is greater than 0, is is below, otherwise it is abow
+                    let diff = abs(current.x - piece.x)
+                    
+                    if (currentPiece is Bishop || currentPiece is Queen) || currentPiece is Pawn && diff == 1 && y_diff == 1{
+                        if currentPiece.player == piece.player{
+                            break
+                        }
+                        attacker = currentPiece
+                    }
+                    
+                    break;
+                }
+                print("(\(current.x), \(current.y))")
+                current.x += increment.x
+                current.y += increment.y
+            }
+        }
+        
+        return attacker
     }
 }
 

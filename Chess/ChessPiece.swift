@@ -27,12 +27,6 @@ protocol Movement{
 
 class PawnMovement : Movement{
     
-    var movedTwo : Bool = false{
-        didSet{
-            print("Caught ya bitch")
-        }
-    }
-    
     var canMoveDirectlyDiagonally: Bool { return false }
     var canMoveDirectlyForward: Bool{ return true }
     var canMoveDirectlyBackwards: Bool{ return false }
@@ -42,9 +36,6 @@ class PawnMovement : Movement{
     private var _up = 1
     private var _down = 0
     func setUpDown(up : Int, down : Int){
-        if up != 1 && down != 1 && up != 0 && down != 0{
-            return
-        }
         self._up = up
         self._down = down
     }
@@ -134,6 +125,14 @@ protocol ChessPieceDelegate{
 
 class ChessPiece : CustomStringConvertible, Equatable, Hashable{
     
+    private var moves = [Point]()
+    
+    var Moves : [Point]{
+        get{
+            return self.moves
+        }
+    }
+    
     var player : Player
     var delegate : ChessPieceDelegate?
     
@@ -163,6 +162,14 @@ class ChessPiece : CustomStringConvertible, Equatable, Hashable{
         get{
             return ""
         }
+    }
+    
+    func setMoves(moves : [Point]){
+        self.moves = moves
+    }
+    
+    func clearMoves(){
+        self.moves = [Point]()
     }
     
     init(origin : Point, movement : Movement, player : Player){
@@ -218,6 +225,10 @@ class Knight : ChessPiece{
         }
     }
     
+    init(){
+        super.init(origin: Point(0,0), movement: KnightMovement(), player: Player(name: "Player 1", id: 1))
+    }
+    
     override init(origin : Point, movement : Movement, player : Player) {
         super.init(origin: origin, movement: movement, player: player)
     }
@@ -228,6 +239,10 @@ class Bishop : ChessPiece{
         get{
             return "Bishop"
         }
+    }
+    
+    init() {
+        super.init(origin: Point(0,0), movement: BishopMovement(), player: Player(name: "Player 1", id: 1))
     }
     
     override init(origin : Point, movement : Movement, player : Player) {
@@ -253,6 +268,10 @@ class King : ChessPiece{
         get{
             return "King"
         }
+    }
+    
+    init(){
+        super.init(origin: Point(0,0), movement: KingMovement(), player: Player(name: "Player 1", id: 1))
     }
     
     override init(origin : Point, movement : Movement, player : Player) {

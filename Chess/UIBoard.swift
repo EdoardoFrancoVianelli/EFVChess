@@ -18,7 +18,7 @@ class Tile : UIBezierPath{
 }
 
 protocol UIBoardDelegate{
-    func pieceTapped(piece : ChessPiece)
+    func pieceTapped(piece : ChessPiece) -> [Point]
     func moveRequested(newLocation : (x : Float, y : Float))
 }
 
@@ -26,6 +26,8 @@ protocol UIBoardDelegate{
 
 class UIBoard : UIView, ChessBoardDelegate, UIChessPieceDelegate{
     
+    var allowedLocations = [Point]()
+    var tiles = [Tile]()
     var delegate : UIBoardDelegate?
     
     internal func pieceRemoved(piece: ChessPiece) {
@@ -105,7 +107,7 @@ class UIBoard : UIView, ChessBoardDelegate, UIChessPieceDelegate{
     
     func getTiles() -> [Tile]
     {
-        var tiles = [Tile]()
+        tiles = [Tile]()
         for i in 0..<64{
             let x = Int(i / 8)
             let y = i % 8
@@ -127,8 +129,10 @@ class UIBoard : UIView, ChessBoardDelegate, UIChessPieceDelegate{
         
         var prevs = [UIColor]()
         
-        let tiles = getTiles()
-        
+        if tiles.isEmpty{
+            tiles = getTiles()
+        }
+    
         for i in 0..<tiles.count{
 
             let tile = tiles[i]
@@ -150,6 +154,18 @@ class UIBoard : UIView, ChessBoardDelegate, UIChessPieceDelegate{
                     prevs[i % 8] = darkBrown
                 }
             }
+        }
+        
+        UIColor.yellow.setFill()
+        for location in allowedLocations{
+            let currentPath = UIBezierPath()
+            currentPath.move(to: CGPoint(x: xPoint(x: location.x), y: yPoint(y: location.y)))
+            currentPath.addLine(to: CGPoint(x: xPoint(x: location.x+1), y: yPoint(y: location.y)))
+            currentPath.addLine(to: CGPoint(x: xPoint(x: location.x+1), y: yPoint(y: location.y+1)))
+            currentPath.addLine(to: CGPoint(x: xPoint(x: location.x), y: yPoint(y: location.y+1)))
+            currentPath.close()
+            currentPath.fill()
+            currentPath.stroke()
         }
     }
     
@@ -195,18 +211,27 @@ class UIBoard : UIView, ChessBoardDelegate, UIChessPieceDelegate{
     func pieceDidChangePosition(piece: ChessPiece, oldPosition: Point) {
         let new_frame = CGRect(x: xPoint(x: piece.x), y: yPoint(y: piece.y), width:frame.size.width / 8, height:frame.size.height / 8)
         if let existingPiece = pieces["\(oldPosition.x)\(oldPosition.y)"]{
-            UIView.animate(withDuration: 0.5, animations: {
-                existingPiece.frame = new_frame
-            })
+            if Settings.animations{
+                UIView.animate(withDuration: 0.5, animations: {
+                    existingPiece.frame = new_frame
+                })
+            }
             pieces["\(piece.x)\(piece.y)"] = existingPiece
         }else{
             print("Cannot find piece")
         }
         pieces.removeValue(forKey: "\(oldPosition.x)\(oldPosition.y)")
+        self.allowedLocations = [Point]()
+        self.setNeedsDisplay()
     }
         
     internal func pieceSelected(piece: ChessPiece) {
-        delegate?.pieceTapped(piece: piece)
+        if let locations = delegate?.pieceTapped(piece: piece){
+            if Settings.allowedMoves{
+                self.allowedLocations = locations
+                self.setNeedsDisplay()
+            }
+        }
     }
 }
 

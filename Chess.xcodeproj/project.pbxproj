@@ -37,6 +37,7 @@
 		A8531E471E550B6E004D553F /* ChessStatusBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8531E461E550B6E004D553F /* ChessStatusBox.swift */; };
 		A8B1FA631E60E991008F2E76 /* SlidingMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8B1FA621E60E991008F2E76 /* SlidingMenu.swift */; };
 		A8B539DC1E8C692F00FB0153 /* TransparentMessageBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8B539DB1E8C692F00FB0153 /* TransparentMessageBox.swift */; };
+		A8EFFC3E1EAB3E0A00FC2891 /* Deprecated.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8EFFC3D1EAB3E0A00FC2891 /* Deprecated.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -93,6 +94,7 @@
 		A8531E461E550B6E004D553F /* ChessStatusBox.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChessStatusBox.swift; sourceTree = "<group>"; };
 		A8B1FA621E60E991008F2E76 /* SlidingMenu.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SlidingMenu.swift; sourceTree = "<group>"; };
 		A8B539DB1E8C692F00FB0153 /* TransparentMessageBox.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransparentMessageBox.swift; sourceTree = "<group>"; };
+		A8EFFC3D1EAB3E0A00FC2891 /* Deprecated.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Deprecated.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -181,6 +183,7 @@
 				A805F23F1E75F8E7005E0B78 /* Move.swift */,
 				A8B539DB1E8C692F00FB0153 /* TransparentMessageBox.swift */,
 				A8389C191EA3504100A22EA5 /* Settings.swift */,
+				A8EFFC3D1EAB3E0A00FC2891 /* Deprecated.swift */,
 			);
 			path = Chess;
 			sourceTree = "<group>";
@@ -394,6 +397,7 @@
 				A8531E371E52FBA6004D553F /* PlayerOptionsViewController.swift in Sources */,
 				A8B539DC1E8C692F00FB0153 /* TransparentMessageBox.swift in Sources */,
 				A8B1FA631E60E991008F2E76 /* SlidingMenu.swift in Sources */,
+				A8EFFC3E1EAB3E0A00FC2891 /* Deprecated.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

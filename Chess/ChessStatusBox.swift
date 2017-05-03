@@ -73,6 +73,9 @@ class ChessStatusBox: UIView {
     
     var secondsPassed = 0{
         didSet{
+            if secondsPassed >= 24 * 60 * 60{
+                secondsPassed = 0
+            }
             updateTitle()
         }
     }
@@ -168,9 +171,11 @@ class ChessStatusBox: UIView {
     private func timeText() -> String{
         let formatter = NumberFormatter()
         formatter.minimumIntegerDigits = 2
-        if let minutes = formatter.string(from: NSNumber(value: secondsPassed / 60)){
-            if let seconds = formatter.string(from: NSNumber(value: secondsPassed % 60)){
-                return "\(minutes):\(seconds)"
+        if let hours = formatter.string(from: NSNumber(value: secondsPassed / 3600)){
+            if let minutes = formatter.string(from: NSNumber(value: (secondsPassed / 60) % 60)){
+                if let seconds = formatter.string(from: NSNumber(value: secondsPassed % 60)){
+                    return "\(hours):\(minutes):\(seconds)"
+                }
             }
         }
         return ""

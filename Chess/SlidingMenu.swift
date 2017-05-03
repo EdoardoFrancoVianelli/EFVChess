@@ -65,25 +65,6 @@ class SlidingMenu: UIView, UITableViewDelegate, UITableViewDataSource{
         let x : CGFloat = 0.0
         return CGRect(x: x, y: startingY, width: width, height: subViewHeight)
     }
-    /*
-    
-    func addLabel(text : String){
-        let new_label = UILabel(frame: objectFrame())
-        new_label.font = UIFont.systemFont(ofSize: 30)
-        new_label.text = text
-        new_label.textAlignment = .center
-        self.addSubview(new_label)
-    }
-    
-    func addButton(text : String){
-        let new_button = UIButton(frame: objectFrame())
-        new_button.setTitle(text, for: .normal)
-        new_button.setTitleColor(UIColor.black, for: .normal)
-        new_button.setTitleColor(UIColor.gray, for: .highlighted)
-        self.addSubview(new_button)
-    }
- 
- */
     
     func addSwitch(text : String, section : Int){
         addElement(text: text, subtitle: "", kind : SlidingMenu.switchIdentifier, section: section)
