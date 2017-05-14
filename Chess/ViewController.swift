@@ -13,6 +13,8 @@ import AVFoundation
 
 class ViewController: UIViewController, GameDelegate, SlidingMenuDelegate, StatusBoxDelegate {
 
+    var player2Kind = PlayerType.Human
+    
     var gameOver : Bool = false
     
     var slidingMenu: SlidingMenu?
@@ -76,7 +78,7 @@ class ViewController: UIViewController, GameDelegate, SlidingMenuDelegate, Statu
         }
         if currentPlayer.id == 1{
             player1Box.showMoveApprovalView = true
-        }else{
+        }else if currentPlayer is Human{
             player2Box.showMoveApprovalView = true
         }
     }
@@ -91,7 +93,7 @@ class ViewController: UIViewController, GameDelegate, SlidingMenuDelegate, Statu
         }else if i.row == 2{
             print("Allowed Moves \(sender.isOn ? "on" : "off")")
             Settings.allowedMoves = sender.isOn
-        }else if i.row == 2{
+        }else if i.row == 3{
             print("Animations \(sender.isOn ? "on" : "off")")
             Settings.animations = sender.isOn
         }
@@ -117,7 +119,7 @@ class ViewController: UIViewController, GameDelegate, SlidingMenuDelegate, Statu
         
         gameStartAlert.addAction(UIAlertAction(title: "OK", style: .default, handler: {
         
-            (action : UIAlertAction) in self.game.startGame()
+            (action : UIAlertAction) in self.game.startGame(clear: true)
         
         }))
         present(gameStartAlert, animated: true, completion: nil)
@@ -151,10 +153,10 @@ class ViewController: UIViewController, GameDelegate, SlidingMenuDelegate, Statu
         slidingMenu?.addElement(text: "End Game", subtitle: "Quit the current game", kind: SlidingMenu.cellIdentifier, section: 0)
         slidingMenu?.addElement(text: "Deleted pieces", subtitle: "See the game's deleted pieces", kind: SlidingMenu.cellIdentifier, section: 0)
         slidingMenu?.addHeader(name: "Settings")
-        slidingMenu?.addSwitch(text: "Sound", section: 1)
-        slidingMenu?.addSwitch(text: "Keyboard Rotation", section: 1)
-        slidingMenu?.addSwitch(text: "Allowed moves", section: 1)
-        slidingMenu?.addSwitch(text: "Animations", section: 1)
+        slidingMenu?.addSwitch(text: "Sound", section: 1, on: Settings.soundOn)
+        slidingMenu?.addSwitch(text: "Keyboard Rotation", section: 1, on: Settings.rotateKeyboard)
+        slidingMenu?.addSwitch(text: "Allowed moves", section: 1, on: Settings.allowedMoves)
+        slidingMenu?.addSwitch(text: "Animations", section: 1, on: Settings.animations)
         slidingMenu?.addHeader(name: "Other")
         slidingMenu?.addElement(text: "Main Menu", subtitle: "Go back to main menu", kind: SlidingMenu.cellIdentifier, section: 2)
         slidingMenu?.delegate = self
@@ -163,7 +165,8 @@ class ViewController: UIViewController, GameDelegate, SlidingMenuDelegate, Statu
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        game = Game(p1: Player(name: firstPlayerName, id: 1), p2: Player(name: secondPlayerName, id: 2))
+        let player2 = player2Kind == .Human ? Human(name: secondPlayerName, id: 2) : Computer(name: secondPlayerName, id: 2)
+        game = Game(p1: Player(name: firstPlayerName, id: 1), p2: player2)
         game.gameDelegate = self
         game.boardDelegate = board
         
@@ -172,7 +175,9 @@ class ViewController: UIViewController, GameDelegate, SlidingMenuDelegate, Statu
         self.player2Box.delegate = self
         self.board.delegate = game
                 
-        game.startGame()
+        game.startGame(clear: false)
+        
+        //game.loadTest1()
         
         slidingMenu?.show()
         

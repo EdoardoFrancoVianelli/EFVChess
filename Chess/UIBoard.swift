@@ -49,12 +49,7 @@ class UIBoard : UIView, ChessBoardDelegate, UIChessPieceDelegate{
     private var angle : CGFloat = 0.0
     
     func rotate(){
-        if angle == 0.0{
-            angle = CGFloat(M_PI)
-        }else{
-            angle = 0.0
-        }
-        
+        angle = angle == 0.0 ? CGFloat(Double.pi) : 0.0
         UIView.animate(withDuration: 1, animations: {
             self.transform = CGAffineTransform.init(rotationAngle: self.angle)
             for view in self.subviews{
@@ -211,11 +206,10 @@ class UIBoard : UIView, ChessBoardDelegate, UIChessPieceDelegate{
     func pieceDidChangePosition(piece: ChessPiece, oldPosition: Point) {
         let new_frame = CGRect(x: xPoint(x: piece.x), y: yPoint(y: piece.y), width:frame.size.width / 8, height:frame.size.height / 8)
         if let existingPiece = pieces["\(oldPosition.x)\(oldPosition.y)"]{
-            if Settings.animations{
-                UIView.animate(withDuration: 0.5, animations: {
-                    existingPiece.frame = new_frame
-                })
-            }
+            print(Settings.animations)
+            UIView.animate(withDuration: Settings.animations ? 0.5 : 0.0, animations: {
+                existingPiece.frame = new_frame
+            })
             pieces["\(piece.x)\(piece.y)"] = existingPiece
         }else{
             print("Cannot find piece")

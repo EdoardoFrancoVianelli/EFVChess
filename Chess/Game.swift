@@ -18,6 +18,15 @@ protocol GameDelegate {
     func pieceMoved(piece : ChessPiece)
 }
 
+enum PlayerType {
+    case Human
+    case CPU
+}
+
+func inRange(x : Int, lo : Int, hi : Int) -> Bool{
+    return x >= lo && x <= hi
+}
+
 class Game : UIBoardDelegate{
     
     private var player1King : King
@@ -123,16 +132,14 @@ class Game : UIBoardDelegate{
         moved.origin = oldPosition
     }
     
-    func verifyCheckMate(p : Player, attackingPiece : ChessPiece, attacked : ChessPiece){ //check if the current player is in checkmate
+    private func verifyCheckMate(p : Player, attackingPiece : ChessPiece, attacked : ChessPiece) -> Bool{ //check if the current player is in checkmate
         //checkmate if the attacking piece cannot be blocked or eaten
         
         let kingAttacker = pieceVulnerable(piece: attackingPiece)
         let blockingPiece = pieceCanBeBlockedFromAttackingPiece(attacker: attackingPiece, attacked: attacked)
+        let escape_possible = canEscapeAll(piece: attacked)
         
-        if ( kingAttacker == nil && blockingPiece == nil){
-            //game over
-            gameOver = true
-        }
+        return kingAttacker == nil && blockingPiece == nil && !escape_possible
     }
     
     func undoPendingMove(){
@@ -147,31 +154,132 @@ class Game : UIBoardDelegate{
     
     func confirmPendingMove(){
         if let pending = self.pendingMove{
-            if let pawn = pending.piece as? Pawn{
-                let movement = pawn.allowedMovement as! PawnMovement
-                let up = movement.up == 2 ? 1 : 0
-                let down = movement.down == 2 ? 1 : 0
+            if let movement = pending.piece.allowedMovement as? PawnMovement{
+                let up = movement.up == 2 ? 1 : movement.up
+                let down = movement.down == 2 ? 1 : movement.down
                 movement.setUpDown(up: up, down: down)
             }
-            pending.piece.setMoves(moves: allowedMovementLocations(piece: pending.piece))
-            self.switchTurns(moved: pending.piece, oldPosition: pending.previousLocation, pieceRemoved: pending.consumedPiece)
+            switchTurns(moved: pending.piece, oldPosition: pending.previousLocation, pieceRemoved: pending.consumedPiece)
             self.pendingMove = nil
         }
     }
     
-    func switchTurns(){
-        self.currentTurn = (self.currentTurn == _player1) ? _player2 : _player1
-        gameDelegate?.didSwitchTurn(player: currentPlayer)
+    
+    
+    private var gameFileName : String{
+        get{
+            return "game.txt"
+        }
     }
     
-    func switchTurns(moved : ChessPiece, oldPosition : Point, pieceRemoved : ChessPiece?){
+    private var gameFilePath : String{
+        get{
+            let documentsPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
+            return documentsPath + "/" + gameFileName
+        }
+    }
+    
+    func clearAndSaveGame(){
+        removeAllPieces()
+        createGamePieces()
+        saveGame()
+    }
+    
+    let fileDelimiter = ","
+    
+    private func loadGame(clear : Bool){
+        if clear {
+            clearAndSaveGame()
+            return
+        }
+        do {
+            let fileContents = try String(contentsOfFile: gameFilePath)
+            let lines = fileContents.components(separatedBy: "\n")
+            let p1Name = lines[0]
+            let p2Name = lines[1]
+            for i in 2..<lines.count-1{ //skip the last newline
+                let line_components = lines[i].components(separatedBy: fileDelimiter)
+                let (x, y) = (Int(line_components[1]),Int(line_components[2]))
+                let player_id = Int(line_components[3])
+                if x == nil || y == nil || player_id == nil{
+                    createGamePieces()
+                    return
+                }
+                let line_player = Player(name: player_id == 1 ? p1Name : p2Name, id: player_id!)
+                let origin = Point(x!, y!)
+                var piece : ChessPiece?
+                if line_components[0] == Queen().name{
+                    piece = Queen(origin: origin, movement: QueenMovement(), player: line_player)
+                }else if line_components[0] == King().name{
+                    piece = King(origin: origin, movement: KingMovement(), player: line_player)
+                }else if line_components[0] == Bishop().name{
+                    piece = Bishop(origin: origin, movement: BishopMovement(), player: line_player)
+                }else if line_components[0] == Knight().name{
+                    piece = Knight(origin: origin, movement: KnightMovement(), player: line_player)
+                }else if line_components[0] == Rook().name{
+                    piece = Rook(origin: origin, movement: RookMovement(), player: line_player)
+                }else if line_components[0] == Pawn().name{
+                    let p1_move = PawnMovement()
+                    p1_move.setUpDown(up: 2, down: 0)
+                    let p2_move = PawnMovement()
+                    p2_move.setUpDown(up: 0, down: 2)
+                    piece = Pawn(origin: origin, movement: line_player.id == 1 ? p1_move : p2_move, player: line_player)
+                }
+                if let thisPiece = piece{
+                    addPiece(piece: thisPiece)
+                }else{
+                    //handle error
+                    createGamePieces()
+                    return
+                }
+            }
+        }catch{
+            print("File does not exist, starting new game")
+            clearAndSaveGame()
+        }
+    }
+    
+    private func saveGame(){
+        //queen, king, bishop, knight, rook, pawn
+        var wholeFile = ""
+        wholeFile += "\(_player1.name)\n"
+        wholeFile += "\(_player2.name)\n"
+        for piecePair in self.board.pieces{
+            wholeFile += (piecePair.value.name + fileDelimiter)
+            wholeFile += "\(piecePair.value.origin.x)" + fileDelimiter
+            wholeFile += "\(piecePair.value.origin.y)" + fileDelimiter
+            wholeFile += "\(piecePair.value.player.id)" + "\n"
+        }
+        do{
+            try wholeFile.write(toFile: gameFilePath, atomically: true, encoding: String.Encoding.utf8)
+        }catch{
+            print("Something went wrong")
+        }
+        print(wholeFile)
+    }
+    
+    private func switchTurns(){
+        self.currentTurn = (self.currentTurn == _player1) ? _player2 : _player1
+        self.saveGame()
+        gameDelegate?.didSwitchTurn(player: currentPlayer)
+        
+        if _player2 is Computer && currentTurn == _player2{
+            executeAITurn(player: _player2)
+        }
+    }
+    
+    private func switchTurns(moved : ChessPiece, oldPosition : Point, pieceRemoved : ChessPiece?){
         
         if gameOver { return }
         
         if let attacker = (currentTurn == _player1) ? player1Check : player2Check{
             let king     = (currentTurn == _player1) ? firstPlayerKing : secondPlayerKing
             playerInCheck(p: currentTurn, moved: moved, oldPosition: oldPosition, consumedPiece: pieceRemoved)
-            verifyCheckMate(p: currentTurn, attackingPiece: attacker, attacked: king)
+            
+            if verifyCheckMate(p: currentTurn, attackingPiece: attacker, attacked: king){
+                self.gameOver = true
+            }
+            
             if pieceRemoved != nil{
                 board.addPiece(piece: pieceRemoved!)
             }
@@ -182,18 +290,16 @@ class Game : UIBoardDelegate{
         self.switchTurns()
     }
     
-    func pieceDeselected(){
+    private func pieceDeselected(){
         gameDelegate?.pieceDeselected()
     }
     
-    func pieceSelected(piece : ChessPiece){
-        if piece.Moves.isEmpty{
-            piece.setMoves(moves: allowedMovementLocations(piece: piece))
-        }
+    private func pieceSelected(piece : ChessPiece){
+        piece.setMoves(moves: allowedMovementLocations(piece: piece, beyondPieces: false))
         gameDelegate?.pieceSelected(piece: piece)
     }
     
-    func pieceRemoved(piece : ChessPiece){
+    private func pieceRemoved(piece : ChessPiece){
         if piece.player == _player1{
             player1removed.append(piece)
         }else if piece.player == _player2{
@@ -206,26 +312,35 @@ class Game : UIBoardDelegate{
         self._player2.name = p2
     }
     
-    func pieceMoved(piece : ChessPiece, previousLocation : Point, consumedPiece : ChessPiece?){
-        self.pendingMove = Move(piece: piece, previousLocation: previousLocation, consumedPiece: consumedPiece)
-        self.gameDelegate?.pieceMoved(piece: piece)
+    func createMove(_ piece : ChessPiece, _ previousLocation : Point, _ newLocation : Point, _ consumedPiece : ChessPiece?) -> Move{
+        return Move(piece: piece, previousLocation: previousLocation, newLocation: newLocation, consumedPiece: consumedPiece)
     }
     
-    func changePiecePosition(piece: ChessPiece, newPosition : Point) -> Bool{
+    private func executeMove(move : Move){
+        self.pendingMove = move
+        if let to_capture = move.consumedPiece{
+            if self.consume(piece1: move.piece, piece2: to_capture) == nil{
+                pieceRemoved(piece: to_capture)
+            }
+        }
+        move.piece.origin = move.newLocation
+        self.gameDelegate?.pieceMoved(piece: move.piece)
+    }
+    
+    private func changePiecePosition(piece: ChessPiece, newPosition : Point) -> Bool{
         
         if pendingMove != nil || gameOver || piece.player != currentPlayer{
             return false
         }
         let oldPosition = piece.origin
         if self.canChangePiecePosition(piece: piece, newPosition: newPosition){
-            piece.origin = Point(newPosition.x, newPosition.y)
-            self.pieceMoved(piece: piece, previousLocation: oldPosition, consumedPiece: nil)
+            executeMove(move: createMove(piece, oldPosition, newPosition, nil))
             return true
         }
         return false
     }
     
-    func addPiece(piece : ChessPiece){
+    private func addPiece(piece : ChessPiece){
         
         if let king = piece as? King{
             if piece.player.id == 1{
@@ -238,13 +353,13 @@ class Game : UIBoardDelegate{
         self.board.addPiece(piece: piece)
     }
     
-    func removeAllPieces(){
+    private func removeAllPieces(){
         for element in self.board.pieces{
             self.board.removePiece(piece: element.value)
         }
     }
     
-    func consume(piece1 : ChessPiece, piece2 : ChessPiece) -> ChessPiece?{
+    private func consume(piece1 : ChessPiece, piece2 : ChessPiece) -> ChessPiece?{
         
         if pieceCanEat(piece: piece1, other: piece2){
             self.board.removePiece(piece: piece2)
@@ -257,24 +372,18 @@ class Game : UIBoardDelegate{
         return nil
     }
     
-    func consumePiece(piece1 : ChessPiece, piece2 : ChessPiece) -> Bool{
-        let oldPosition = piece1.origin
+    private func consumePiece(piece1 : ChessPiece, piece2 : ChessPiece) -> Bool{
         if piece1.player == piece2.player || currentPlayer != piece1.player || pendingMove != nil{
             return false
         }
-        
-        if let consumed = self.consume(piece1: piece1, piece2: piece2){
-            pieceRemoved(piece: piece2)
-            self.pieceMoved(piece: piece1, previousLocation: oldPosition, consumedPiece: consumed)
-        }
-        
+        let oldPosition = piece1.origin
+        self.executeMove(move: createMove(piece1, oldPosition, piece2.origin, piece2))
         return true
     }
     
     //MARK: Game initialization code
 
-    func startGame(){
-        self.gameOver = false
+    private func createGamePieces(){
         self.removeAllPieces()
         self.initPawns()
         self.initRooks()
@@ -282,10 +391,20 @@ class Game : UIBoardDelegate{
         self.initBishops()
         self.initKings()
         self.initQueens()
+    }
+    
+    private func start()
+    {
         gameDelegate?.gameStarted()
         if currentPlayer.id == 2{
             self.switchTurns()
         }
+    }
+    
+    func startGame(clear : Bool){
+        self.gameOver = false
+        loadGame(clear: clear)//  createGamePieces()
+        start()
     }
     
     private func initPawns(){
@@ -321,16 +440,16 @@ class Game : UIBoardDelegate{
     }
     
     private func initKings(){
-        addPiece(piece: King(origin: Point(4,0), movement: KingMovement(), player: secondPlayer))
-        addPiece(piece: King(origin: Point(4,7), movement: KingMovement(), player: firstPlayer))
+        addPiece(piece: King(origin: Point(3,0), movement: KingMovement(), player: secondPlayer))
+        addPiece(piece: King(origin: Point(3,7), movement: KingMovement(), player: firstPlayer))
     }
     
     private func initQueens(){
-        addPiece(piece: Queen(origin: Point(3,0), movement: QueenMovement(), player: secondPlayer))
-        addPiece(piece: Queen(origin: Point(3,7), movement: QueenMovement(), player: firstPlayer))
+        addPiece(piece: Queen(origin: Point(4,0), movement: QueenMovement(), player: secondPlayer))
+        addPiece(piece: Queen(origin: Point(4,7), movement: QueenMovement(), player: firstPlayer))
     }
 
-    func moveRequested(newLocation: (x: Float, y: Float)) {
+    internal func moveRequested(newLocation: (x: Float, y: Float)) {
         if selected == nil{
             return
         }
@@ -353,7 +472,7 @@ class Game : UIBoardDelegate{
         }
     }
     
-    func pieceTapped(piece: ChessPiece) -> [Point]{
+    internal func pieceTapped(piece: ChessPiece) -> [Point]{
         if piece.player.id == currentTurn.id{
             self.selected = piece
             return piece.Moves
@@ -373,7 +492,7 @@ class Game : UIBoardDelegate{
     king and bishop against king and bishop, with both bishops on squares of the same color (see Checkmate#Unusual mates).[18]
      */
     
-    func remainingPiecesDraw() -> Bool{
+    private func remainingPiecesDraw() -> Bool{
         
         if board.pieces.count >= 2 && board.pieces.count <= 4{
             var remaining = Dictionary<String, Int>()
@@ -396,13 +515,13 @@ class Game : UIBoardDelegate{
         return false
     }
     
-    func pieceCanEat(piece : ChessPiece, other : ChessPiece) -> Bool{
+    private func pieceCanEat(piece : ChessPiece, other : ChessPiece) -> Bool{
         
         if piece.player == other.player{
             return false
         }
         
-        let allowed  = allowedMovementLocations(piece: piece).contains(where: { (p : Point) in
+        let allowed  = allowedMovementLocations(piece: piece, beyondPieces: false).contains(where: { (p : Point) in
             return Point(p.x,p.y) == other.origin
         })// changeAllowed(piece: piece, newPosition: other.origin, inclusive: false)
         let can_move = movementPossible(piece: piece, newPosition: other.origin)
@@ -415,20 +534,40 @@ class Game : UIBoardDelegate{
     //can we escape from the current piece? And can we find a location where
     //we won't be in check?
     
-    func canEscape(piece : ChessPiece, other : ChessPiece) -> Bool{
-        let piece1Locations = Set(allowedMovementLocations(piece: piece))
-        let piece2Locations = Set(allowedMovementLocations(piece: other))
+    private func canEscapeAll(piece : ChessPiece) -> Bool{
+        //get all the opposing pieces
+        let opposing = self.board.pieces.filter({
+            (key : String, value : ChessPiece) in
+            return value.player.id == (piece.player.id == 1 ? 2 : 1)
+        })
+        
+        var locations = Set(allowedMovementLocations(piece: piece, beyondPieces: false))
+        
+        for piecePair in opposing{
+            let allowed_moves = Set(allowedMovementLocations(piece: piecePair.value, beyondPieces: true))
+            locations.subtract(allowed_moves)
+            if locations.isEmpty{
+                return false
+            }
+        }
+        
+        return !locations.isEmpty
+    }
+    
+    private func canEscape(piece : ChessPiece, other : ChessPiece) -> Bool{
+        let piece1Locations = Set(allowedMovementLocations(piece: piece, beyondPieces: true))
+        let piece2Locations = Set(allowedMovementLocations(piece: other, beyondPieces: true))
         let subtraction = piece1Locations.subtracting(piece2Locations)
         return !subtraction.isEmpty
     }
     
-    func pieceCanBeBlockedFromAttackingPiece(attacker : ChessPiece, attacked : ChessPiece) -> ChessPiece?{
+    private func pieceCanBeBlockedFromAttackingPiece(attacker : ChessPiece, attacked : ChessPiece) -> ChessPiece?{
         
-        let attackLocations = Set(allowedMovementLocations(piece: attacker))
+        let attackLocations = Set(allowedMovementLocations(piece: attacker, beyondPieces: false))
         
         for (_, piece) in self.board.pieces{
-            if piece.player == attacked.player{
-                let pieceLocations = Set(allowedMovementLocations(piece: piece))
+            if piece.player == attacked.player && piece.origin.x != attacked.origin.x && piece.origin.y != attacked.origin.y{
+                let pieceLocations = Set(allowedMovementLocations(piece: piece, beyondPieces: false))
                 if !attackLocations.intersection(pieceLocations).isEmpty{
                     return piece
                 }
@@ -438,7 +577,7 @@ class Game : UIBoardDelegate{
         return nil
     }
     
-    func allowedMovementLocations(piece : ChessPiece) -> [Point]{
+    private func allowedMovementLocations(piece : ChessPiece, beyondPieces : Bool) -> [Point]{
         let pieceMovement = piece.allowedMovement
         var locations = [Point]()
         
@@ -470,20 +609,54 @@ class Game : UIBoardDelegate{
                         //unless it's a pawn at it can only capture diagonally
                         locations.append(Point(x,y))
                     }
-                    break
+                    if !beyondPieces{
+                        break
+                    }
                 }
             }
         }
         
+        /*Special cases*/
+        
+        /*
+                   ___
+                    |
+                 |  |  |
+                 |--k--|
+                 |  |  |
+                    |
+                    |
+                   ---
+ 
+        */
+        
         if piece is Knight{
-            let possible_locations : [Point] = [Point(piece.x - 1, piece.y - 2),
-                                                Point(piece.x + 1, piece.y - 2),
-                                                Point(piece.x - 1, piece.y + 2),
-                                                Point(piece.x + 1, piece.y + 2)]
-            for location in possible_locations{
+            let knight_increments : [(x : Int, y : Int)] = [(-1,-2), (-1,2), (1,2), (1,-2), (2,-1), (2,1), (-2,-1), (-2,1)]
+            for inc in knight_increments{
+                let location = Point(piece.x + inc.x, piece.y + inc.y)
                 if location.x >= 0 && location.x < 8 && location.y >= 0 && location.y < 8{
-                    if !self.board.hasPieceAtPoint(point: location){
+                    if let obstructingPiece = self.board.pieceAt(x: location.x, y: location.y){
+                        if obstructingPiece.player.id != piece.player.id{
+                            locations.append(location)
+                        }
+                    }else{
                         locations.append(location)
+                    }
+                }
+            }
+        }else if piece is Pawn{
+            let (x, y) = (piece.origin.x, piece.origin.y)
+            let possiblePoints = [Point(x - 1, y-1), Point(x+1, y-1), Point(x-1, y+1), Point(x+1, y+1)]
+            let startIndex = piece.player.id == 1 ? 0 : 2
+            for i in startIndex..<possiblePoints.count{
+                /*is this a valid location and is there an opposing piece*/
+                let location = possiblePoints[i]
+                if inRange(x: location.x, lo: 0, hi: 7) &&
+                    inRange(x: location.y, lo: 0, hi: 7) {
+                    if let diagonalPiece = self.board.pieceAt(x: location.x, y: location.y) {
+                        if diagonalPiece.player.id != piece.player.id{
+                            locations.append(location)
+                        }
                     }
                 }
             }
@@ -492,7 +665,7 @@ class Game : UIBoardDelegate{
         return locations
     }
     
-    func canChangePiecePosition(piece : ChessPiece, newPosition : Point) -> Bool{
+    private func canChangePiecePosition(piece : ChessPiece, newPosition : Point) -> Bool{
         
         //verify legitimacy of position change
         let locations = piece.Moves// allowedMovementLocations(piece: piece)
@@ -534,7 +707,7 @@ class Game : UIBoardDelegate{
         return false
     }
     
-    func pieceVulnerable(piece : ChessPiece) -> ChessPiece? {
+    private func pieceVulnerable(piece : ChessPiece) -> ChessPiece? {
         
         let left_r_up_d = ["Left", "Right", "Up", "Down"]
         let lr_ud_increments  : [(x : Int, y : Int)] = [(-1, 0), (1,0), (0, -1), (0, 1)]
@@ -608,6 +781,35 @@ class Game : UIBoardDelegate{
         }
         
         return attacker
+    }
+    
+    /*MARK: AI Functions*/
+    
+    func GetAllMoves(player : Player) -> [Move]{
+        var moves = [Move]()
+        
+        let player_pieces = board.pieces.flatMap({ $1.player == player ? $1 : nil })
+        
+        for piece in player_pieces{
+            piece.setMoves(moves: allowedMovementLocations(piece: piece, beyondPieces: false))
+            for location in piece.Moves{
+                let capturedPiece = board.pieceAt(x: location.x, y: location.y)
+                let currentMove = Move(piece: piece, previousLocation: piece.origin, newLocation: location, consumedPiece: capturedPiece)
+                moves.append(currentMove)
+            }
+        }
+        
+        return moves
+    }
+    
+    func executeAITurn(player : Player){
+        /*Get all the moves and prioritize the ones that result in a capture*/
+        let allMoves = GetAllMoves(player: player).sorted(by: { (m1 : Move, m2 : Move) in m1.consumedPiece != nil && m2.consumedPiece == nil})
+        /*GET A RANDOM MOVE*/
+        let random_index = Int(arc4random_uniform(UInt32(allMoves.count)))
+        let move = allMoves[0].consumedPiece == nil ? allMoves[random_index] : allMoves[0]
+        executeMove(move: move)
+        self.confirmPendingMove()
     }
 }
 

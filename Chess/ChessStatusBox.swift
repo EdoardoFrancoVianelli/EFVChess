@@ -188,6 +188,14 @@ class ChessStatusBox: UIView {
         initializeButtons()
     }
     
+    override init(frame: CGRect) {
+        imageDisplayer = UIImageView()
+        image = UIImage()
+        pieceLabel = UILabel()
+        super.init(frame: frame)
+        initialize()
+    }
+    
     required init?(coder aDecoder: NSCoder) {
         imageDisplayer = UIImageView()
         image = UIImage()

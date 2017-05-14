@@ -28,7 +28,7 @@ class Settings
             if let setting = getSettingWithName(name: movesAllowed) as? Bool{
                 return setting
             }
-            return false
+            return true
         }set{
             UserDefaults.standard.set(newValue, forKey: movesAllowed)
         }
@@ -39,7 +39,7 @@ class Settings
             if let setting = getSettingWithName(name: animationsEnabled) as? Bool{
                 return setting
             }
-            return false
+            return true
         }set{
             UserDefaults.standard.set(newValue, forKey: animationsEnabled)
         }
@@ -50,7 +50,7 @@ class Settings
             if let setting = getSettingWithName(name: soundKey) as? Bool{
                 return setting
             }
-            return false
+            return true
         }
         set{
             UserDefaults.standard.set(newValue, forKey: soundKey)
@@ -62,7 +62,7 @@ class Settings
             if let setting = getSettingWithName(name: rotateKeyboardKey) as? Bool{
                 return setting
             }
-            return false
+            return true
         }set{
             UserDefaults.standard.set(newValue, forKey: rotateKeyboardKey)
         }

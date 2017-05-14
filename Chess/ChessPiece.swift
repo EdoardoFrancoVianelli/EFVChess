@@ -201,6 +201,11 @@ class Pawn : ChessPiece{
         }
     }
     
+    
+    init(){
+        super.init(origin: Point(0,0), movement: PawnMovement(), player: Player(name: "Player 1", id: 1))
+    }
+    
     init(origin : Point, movement : PawnMovement, player : Player) {
         super.init(origin: origin, movement: movement, player: player)
     }
@@ -211,6 +216,10 @@ class Rook : ChessPiece{
         get{
             return "Rook"
         }
+    }
+    
+    init() {
+        super.init(origin: Point(0,0), movement: RookMovement(), player: Player(name: "Player 1", id: 1))
     }
     
     override init(origin : Point, movement : Movement, player : Player) {
@@ -255,6 +264,10 @@ class Queen : ChessPiece{
         get{
             return "Queen"
         }
+    }
+    
+    init() {
+        super.init(origin: Point(0,0), movement: QueenMovement(), player: Player(name: "Player 1", id: 1))
     }
     
     override init(origin : Point, movement : Movement, player : Player) {

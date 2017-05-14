@@ -8,14 +8,22 @@
 
 import Foundation
 
-class Move{
+class Move : CustomStringConvertible{
     var piece : ChessPiece
     var previousLocation : Point
     var consumedPiece : ChessPiece?
+    var newLocation : Point
     
-    init(piece : ChessPiece, previousLocation : Point, consumedPiece : ChessPiece?) {
+    init(piece : ChessPiece, previousLocation : Point, newLocation : Point, consumedPiece : ChessPiece?) {
         self.piece = piece
         self.previousLocation = previousLocation
         self.consumedPiece = consumedPiece
+        self.newLocation = newLocation
+    }
+    
+    var description: String{
+        get{
+            return "from:\(previousLocation) to:\(newLocation) consuming:\(String(describing: consumedPiece))"
+        }
     }
 }

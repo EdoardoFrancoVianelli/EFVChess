@@ -22,9 +22,10 @@ class SlidingMenu: UIView, UITableViewDelegate, UITableViewDataSource{
     
     private var table : UITableView?
     
-    let heightOffset : CGFloat = 20
-    let subViewHeight : CGFloat = 40
-    let windowRatio : CGFloat = 0.60
+    private let heightOffset : CGFloat = 20
+    private let subViewHeight : CGFloat = 40
+    private let windowRatio : CGFloat = 0.60
+    private var switchValues = [[Bool]]()
     
     init(sp : UIView){
         super.init(frame: CGRect.zero)
@@ -43,6 +44,13 @@ class SlidingMenu: UIView, UITableViewDelegate, UITableViewDataSource{
         table?.delegate = self
         table?.dataSource = self
         self.addSubview(table!)
+    }
+    
+    func setSwitchValue(section : Int, row : Int, value : Bool){
+        while row >= self.switchValues[section].count{
+            self.switchValues[section].append(true)
+        }
+        self.switchValues[section][row] = value
     }
     
     func initPanGesture(sp : UIView){
@@ -66,7 +74,11 @@ class SlidingMenu: UIView, UITableViewDelegate, UITableViewDataSource{
         return CGRect(x: x, y: startingY, width: width, height: subViewHeight)
     }
     
-    func addSwitch(text : String, section : Int){
+    func addSwitch(text : String, section : Int, on : Bool){
+        while section >= self.switchValues.count{
+            self.switchValues.append([Bool]())
+        }
+        setSwitchValue(section: section, row: switchValues[section].count, value: on)
         addElement(text: text, subtitle: "", kind : SlidingMenu.switchIdentifier, section: section)
     }
     
@@ -98,6 +110,9 @@ class SlidingMenu: UIView, UITableViewDelegate, UITableViewDataSource{
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        if section >= elements.count{
+            return 0
+        }
         return elements[section].count
     }
     
@@ -118,6 +133,12 @@ class SlidingMenu: UIView, UITableViewDelegate, UITableViewDataSource{
            cell.detailTextLabel?.text = current.subtitle
         }else if current.kind == SlidingMenu.switchIdentifier{
             let opt_switch = UISwitch(frame: CGRect(origin: CGPoint.zero, size: CGSize(width: 51.0, height: 31.0)))
+            opt_switch.isOn = true
+            if indexPath.section < self.switchValues.count{
+                if indexPath.row < self.switchValues[indexPath.section].count{
+                    opt_switch.isOn = self.switchValues[indexPath.section][indexPath.row]
+                }
+            }
             opt_switch.frame.origin = CGPoint(x: frame.size.width - opt_switch.frame.width - 10, y: (cell.frame.size.height / 2) - opt_switch.frame.size.height / 2)
             opt_switch.addTarget(self, action: #selector(handleValueChanged), for: .valueChanged)
             cell.addSubview(opt_switch)

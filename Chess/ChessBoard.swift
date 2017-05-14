@@ -14,7 +14,7 @@ protocol ChessBoardDelegate {
     func pieceRemoved(piece : ChessPiece)
 }
 
-class Point : Hashable, Equatable{
+class Point : Hashable, Equatable, CustomStringConvertible{
     var x = 0
     var y = 0
     
@@ -30,6 +30,12 @@ class Point : Hashable, Equatable{
     public static func ==(lhs: Point, rhs: Point) -> Bool
     {
         return (lhs.x, lhs.y) == (rhs.x, rhs.y)
+    }
+    
+    public var description: String {
+        get {
+            return "(\(x),(\(y))"
+        }
     }
 }
 
