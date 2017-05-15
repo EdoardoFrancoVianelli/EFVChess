@@ -13,6 +13,8 @@ import AVFoundation
 
 class ViewController: UIViewController, GameDelegate, SlidingMenuDelegate, StatusBoxDelegate {
 
+    var loadSavedGame = false
+    
     var player2Kind = PlayerType.Human
     
     var gameOver : Bool = false
@@ -33,6 +35,11 @@ class ViewController: UIViewController, GameDelegate, SlidingMenuDelegate, Statu
     
     var timer : Timer?
     
+    @IBAction func undoRequested(_ sender: Any) {
+    }
+    @IBAction func redoRequested(_ sender: Any) {
+    }
+
     func updateStatusLabel(){
         statusLabel.text = "\(currentPlayer.name)'s turn"
     }
@@ -175,7 +182,7 @@ class ViewController: UIViewController, GameDelegate, SlidingMenuDelegate, Statu
         self.player2Box.delegate = self
         self.board.delegate = game
                 
-        game.startGame(clear: false)
+        game.startGame(clear: self.loadSavedGame == false)
         
         //game.loadTest1()
         

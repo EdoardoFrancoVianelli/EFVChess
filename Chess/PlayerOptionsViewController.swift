@@ -17,13 +17,33 @@ class PlayerOptionsViewController: UIViewController {
     @IBOutlet weak var player2label: UILabel!
     @IBOutlet weak var player1label: UILabel!
     
+    var loadSavedGame = false
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        if FileManager.default.fileExists(atPath: Settings.gameFilePath){
+            self.performSegue(withIdentifier: "gameTransitionSegue", sender: self)
+            /*
+             //ASK THE USER TO LOAD THE SAVED GAME
+             let resume_alert = UIAlertController(title: "Load saved game?", message: nil, preferredStyle: .alert)
+             resume_alert.addAction(UIAlertAction(title: "Yes", style: .default, handler: {
+             (action : UIAlertAction?) in
+             self.loadSavedGame = true
+             self.performSegue(withIdentifier: "gameTransitionSegue", sender: self)
+             }))
+             resume_alert.addAction(UIAlertAction(title: "No", style: .cancel, handler: nil))
+             self.present(resume_alert, animated: true, completion: nil)
+             */
+        }
         // Do any additional setup after loading the view.
     }
 
+    
+    
     override func viewWillAppear(_ animated: Bool) {
         self.navigationController?.setNavigationBarHidden(true, animated: true)
+        //is there a currently saved game?
+
     }
     
     override func didReceiveMemoryWarning() {
@@ -44,6 +64,7 @@ class PlayerOptionsViewController: UIViewController {
         // Pass the selected object to the new view controller.
     
         if let dest = (segue.destination as? ViewController){
+            dest.loadSavedGame = self.loadSavedGame
             dest.firstPlayerName = player1Box.text!
             dest.secondPlayerName = player2Box.text!
             dest.player2Kind = player2Type

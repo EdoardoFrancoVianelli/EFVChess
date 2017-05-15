@@ -52,7 +52,19 @@ class Game : UIBoardDelegate{
         return pieceVulnerable(piece: player2King)
     }
     
-    private var pendingMove : Move?
+    private var undoStack = [Move]()
+    private var redoStack = [Move]()
+    
+    private var pendingMove : Move?{
+        get{
+            return undoStack.popLast()
+        }set{
+            if newValue == nil {
+                return
+            }
+            undoStack.append(newValue!)
+        }
+    }
     
     var gameOver : Bool = false{
         didSet{
@@ -164,28 +176,11 @@ class Game : UIBoardDelegate{
         }
     }
     
-    
-    
-    private var gameFileName : String{
-        get{
-            return "game.txt"
-        }
-    }
-    
-    private var gameFilePath : String{
-        get{
-            let documentsPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
-            return documentsPath + "/" + gameFileName
-        }
-    }
-    
     func clearAndSaveGame(){
         removeAllPieces()
         createGamePieces()
         saveGame()
     }
-    
-    let fileDelimiter = ","
     
     private func loadGame(clear : Bool){
         if clear {
@@ -193,12 +188,12 @@ class Game : UIBoardDelegate{
             return
         }
         do {
-            let fileContents = try String(contentsOfFile: gameFilePath)
+            let fileContents = try String(contentsOfFile: Settings.gameFilePath)
             let lines = fileContents.components(separatedBy: "\n")
             let p1Name = lines[0]
             let p2Name = lines[1]
             for i in 2..<lines.count-1{ //skip the last newline
-                let line_components = lines[i].components(separatedBy: fileDelimiter)
+                let line_components = lines[i].components(separatedBy: Settings.fileDelimiter)
                 let (x, y) = (Int(line_components[1]),Int(line_components[2]))
                 let player_id = Int(line_components[3])
                 if x == nil || y == nil || player_id == nil{
@@ -245,13 +240,13 @@ class Game : UIBoardDelegate{
         wholeFile += "\(_player1.name)\n"
         wholeFile += "\(_player2.name)\n"
         for piecePair in self.board.pieces{
-            wholeFile += (piecePair.value.name + fileDelimiter)
-            wholeFile += "\(piecePair.value.origin.x)" + fileDelimiter
-            wholeFile += "\(piecePair.value.origin.y)" + fileDelimiter
+            wholeFile += (piecePair.value.name + Settings.fileDelimiter)
+            wholeFile += "\(piecePair.value.origin.x)" + Settings.fileDelimiter
+            wholeFile += "\(piecePair.value.origin.y)" + Settings.fileDelimiter
             wholeFile += "\(piecePair.value.player.id)" + "\n"
         }
         do{
-            try wholeFile.write(toFile: gameFilePath, atomically: true, encoding: String.Encoding.utf8)
+            try wholeFile.write(toFile: Settings.gameFilePath, atomically: true, encoding: String.Encoding.utf8)
         }catch{
             print("Something went wrong")
         }
@@ -319,8 +314,10 @@ class Game : UIBoardDelegate{
     private func executeMove(move : Move){
         self.pendingMove = move
         if let to_capture = move.consumedPiece{
-            if self.consume(piece1: move.piece, piece2: to_capture) == nil{
+            if self.consume(piece1: move.piece, piece2: to_capture) != nil{
                 pieceRemoved(piece: to_capture)
+            }else{
+                return
             }
         }
         move.piece.origin = move.newLocation
@@ -403,7 +400,7 @@ class Game : UIBoardDelegate{
     
     func startGame(clear : Bool){
         self.gameOver = false
-        loadGame(clear: clear)//  createGamePieces()
+        loadGame(clear: clear)
         start()
     }
     
@@ -709,81 +706,31 @@ class Game : UIBoardDelegate{
     
     private func pieceVulnerable(piece : ChessPiece) -> ChessPiece? {
         
-        let left_r_up_d = ["Left", "Right", "Up", "Down"]
-        let lr_ud_increments  : [(x : Int, y : Int)] = [(-1, 0), (1,0), (0, -1), (0, 1)]
+        let desired_player = piece.player == _player1 ? _player2 : _player1
         
-        //check left and right
-        
-        var attacker : ChessPiece?
-        
-        print(piece)
-        
-        for (index,increment) in lr_ud_increments.enumerated(){
-            var x = piece.x
-            var y = piece.y
-            print(left_r_up_d[index])
-            for i in 0..<8{
-                x += increment.x
-                y += increment.y
-                if (i == piece.x && index == 0) || (i == piece.y && index == 0){
-                    continue
-                }
-                print("\(x),\(y)")
-                if let currentPiece = self.board.pieces["\(x)\(y)"]{
-                    
-                    //check if the current piece can consume the other piece
-                    
-                    let x_diff = abs(piece.x - currentPiece.x)
-                    let y_diff = abs(piece.y - currentPiece.y)
-                    
-                    if piece.player == currentPiece.player{
-                        break
-                    }
-                    
-                    if (currentPiece is Queen || currentPiece is Rook) && ((x_diff == 0 && y_diff > 0) || (y_diff == 0 && x_diff > 0)){
-                        attacker = currentPiece
-                    }else if currentPiece is King && (x_diff <= 1 && y_diff <= 1){
-                        attacker = currentPiece
-                    }
-                    
-                    break;
+        for current_piece in self.board.pieces.values{
+            if current_piece.player == desired_player{
+                let piece_moves = allowedMovementLocations(piece: current_piece, beyondPieces: false)
+                if piece_moves.contains(piece.origin){
+                    return piece
                 }
             }
         }
         
-        //check diagonals
-        
-        let diagonal_descr = ["Lower right", "Upper left", "Upper right", "Lower left"]
-        let increments : [(x : Int, y : Int)] = [(1,1), (-1, -1), (1,-1), (-1, 1)]
-        
-        for (i, increment) in increments.enumerated(){
-            var current : (x : Int, y : Int) = (piece.origin.x + increment.x, piece.origin.y + increment.y)
-            print(diagonal_descr[i])
-            while current.x >= 0 && current.x < 8 && current.y >= 0 && current.y < 8{
-                if let currentPiece = self.board.pieces["\(current.x)\(current.y)"]{
-                    
-                    let y_diff = currentPiece.y - piece.y //if y is greater than 0, is is below, otherwise it is abow
-                    let diff = abs(current.x - piece.x)
-                    
-                    if (currentPiece is Bishop || currentPiece is Queen) || currentPiece is Pawn && diff == 1 && y_diff == 1{
-                        if currentPiece.player == piece.player{
-                            break
-                        }
-                        attacker = currentPiece
-                    }
-                    
-                    break;
-                }
-                print("(\(current.x), \(current.y))")
-                current.x += increment.x
-                current.y += increment.y
-            }
-        }
-        
-        return attacker
+        return nil
     }
     
     /*MARK: AI Functions*/
+    
+    func MovesForPiece(piece : ChessPiece) -> [Move]{
+        var moves = [Move]()
+        for location in piece.Moves{
+            let capturedPiece = board.pieceAt(x: location.x, y: location.y)
+            let currentMove = Move(piece: piece, previousLocation: piece.origin, newLocation: location, consumedPiece: capturedPiece)
+            moves.append(currentMove)
+        }
+        return moves
+    }
     
     func GetAllMoves(player : Player) -> [Move]{
         var moves = [Move]()
@@ -792,11 +739,7 @@ class Game : UIBoardDelegate{
         
         for piece in player_pieces{
             piece.setMoves(moves: allowedMovementLocations(piece: piece, beyondPieces: false))
-            for location in piece.Moves{
-                let capturedPiece = board.pieceAt(x: location.x, y: location.y)
-                let currentMove = Move(piece: piece, previousLocation: piece.origin, newLocation: location, consumedPiece: capturedPiece)
-                moves.append(currentMove)
-            }
+            moves.append(contentsOf: MovesForPiece(piece: piece))
         }
         
         return moves
@@ -804,11 +747,26 @@ class Game : UIBoardDelegate{
     
     func executeAITurn(player : Player){
         /*Get all the moves and prioritize the ones that result in a capture*/
-        let allMoves = GetAllMoves(player: player).sorted(by: { (m1 : Move, m2 : Move) in m1.consumedPiece != nil && m2.consumedPiece == nil})
+        var allMoves = GetAllMoves(player: player).sorted(by: { (m1 : Move, m2 : Move) in m1.consumedPiece != nil && m2.consumedPiece == nil})
         /*GET A RANDOM MOVE*/
-        let random_index = Int(arc4random_uniform(UInt32(allMoves.count)))
-        let move = allMoves[0].consumedPiece == nil ? allMoves[random_index] : allMoves[0]
+        var random_index = Int(arc4random_uniform(UInt32(allMoves.count)))
+        var move = allMoves[0].consumedPiece == nil ? allMoves[random_index] : allMoves[0]
         executeMove(move: move)
+        
+        while player2Check != nil{ /*GET OUT OF CHECK IF NEEDED*/
+            undoPendingMove() /*THE PREVIOUS MOVE GOT US IN CHECK SO IT WAS NO GOOD, UNDO IT*/
+            allMoves.remove(at: random_index) /*REMOVE THE MOVE THAT WOULD BRING US TO CHECK*/
+            if allMoves.isEmpty{ /*WE LOST*/
+                if verifyCheckMate(p: player, attackingPiece: player2Check!, attacked: player2King){
+                    gameOver = true
+                }
+                return
+            }
+            random_index = Int(arc4random_uniform(UInt32(allMoves.count)))
+            move = allMoves[0].consumedPiece == nil ? allMoves[random_index] : allMoves[0]
+            executeMove(move: move)
+        }
+        
         self.confirmPendingMove()
     }
 }

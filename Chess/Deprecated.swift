@@ -142,6 +142,84 @@ private func changeAllowed(piece : ChessPiece, newPosition : Point, inclusive : 
     
     return allowed
 }
+
+
+private func pieceVulnerable(piece : ChessPiece) -> ChessPiece? {
+    
+     let left_r_up_d = ["Left", "Right", "Up", "Down"]
+     let lr_ud_increments  : [(x : Int, y : Int)] = [(-1, 0), (1,0), (0, -1), (0, 1)]
+     
+     //check left and right
+     
+     var attacker : ChessPiece?
+     
+     print(piece)
+     
+     for (index,increment) in lr_ud_increments.enumerated(){
+     var x = piece.x
+     var y = piece.y
+     print(left_r_up_d[index])
+     for i in 0..<8{
+     x += increment.x
+     y += increment.y
+     if (i == piece.x && index == 0) || (i == piece.y && index == 0){
+     continue
+     }
+     print("\(x),\(y)")
+     if let currentPiece = self.board.pieces["\(x)\(y)"]{
+     
+     //check if the current piece can consume the other piece
+     
+     let x_diff = abs(piece.x - currentPiece.x)
+     let y_diff = abs(piece.y - currentPiece.y)
+     
+     if piece.player == currentPiece.player{
+     break
+     }
+     
+     if (currentPiece is Queen || currentPiece is Rook) && ((x_diff == 0 && y_diff > 0) || (y_diff == 0 && x_diff > 0)){
+     attacker = currentPiece
+     }else if currentPiece is King && (x_diff <= 1 && y_diff <= 1){
+     attacker = currentPiece
+     }
+     
+     break;
+     }
+     }
+     }
+     
+     //check diagonals
+     
+     let diagonal_descr = ["Lower right", "Upper left", "Upper right", "Lower left"]
+     let increments : [(x : Int, y : Int)] = [(1,1), (-1, -1), (1,-1), (-1, 1)]
+     
+     for (i, increment) in increments.enumerated(){
+     var current : (x : Int, y : Int) = (piece.origin.x + increment.x, piece.origin.y + increment.y)
+     print(diagonal_descr[i])
+     while current.x >= 0 && current.x < 8 && current.y >= 0 && current.y < 8{
+     if let currentPiece = self.board.pieces["\(current.x)\(current.y)"]{
+     
+     let y_diff = currentPiece.y - piece.y //if y is greater than 0, is is below, otherwise it is abow
+     let diff = abs(current.x - piece.x)
+     
+     if (currentPiece is Bishop || currentPiece is Queen) || currentPiece is Pawn && diff == 1 && y_diff == 1{
+     if currentPiece.player == piece.player{
+     break
+     }
+     attacker = currentPiece
+     }
+     
+     break;
+     }
+     print("(\(current.x), \(current.y))")
+     current.x += increment.x
+     current.y += increment.y
+     }
+     }
+     
+     return attacker
+}
+
 */
 
 

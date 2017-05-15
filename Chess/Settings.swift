@@ -15,6 +15,22 @@ let animationsEnabled = "animations"
 
 class Settings
 {
+    static var fileDelimiter : String{
+        return ","
+    }
+
+    
+    static var gameFileName : String{
+        return "game.txt"
+    }
+    
+    static var gameFilePath : String{
+        get{
+            let documentsPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
+            return documentsPath + "/" + gameFileName
+        }
+    }
+    
     static func getSettingWithName(name : String) -> Any?{
         if (UserDefaults.standard.object(forKey: name) != nil){
             return UserDefaults.standard.object(forKey: name)
