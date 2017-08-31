@@ -68,7 +68,9 @@ class ChessBoard : ChessPieceDelegate {
     }
     
     func removePiece(piece : ChessPiece){
-        self.board.removeValue(forKey: "\(piece.x)\(piece.y)")
+        if self.board.removeValue(forKey: "\(piece.x)\(piece.y)") == nil{
+            print("hello")
+        }
         self.delegate?.pieceRemoved(piece: piece)
     }
     

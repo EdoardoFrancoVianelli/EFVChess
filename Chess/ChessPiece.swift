@@ -189,7 +189,7 @@ class ChessPiece : CustomStringConvertible, Equatable, Hashable{
     }
     
     public static func ==(lhs: ChessPiece, rhs: ChessPiece) -> Bool{
-        return lhs.name == rhs.name && lhs.origin == rhs.origin
+        return lhs.name == rhs.name && lhs.origin == rhs.origin && rhs.player == lhs.player
     }
 }
 
@@ -212,6 +212,7 @@ class Pawn : ChessPiece{
 }
 
 class Rook : ChessPiece{
+    
     override var name: String{
         get{
             return "Rook"
@@ -228,6 +229,7 @@ class Rook : ChessPiece{
 }
 
 class Knight : ChessPiece{
+    
     override var name: String{
         get{
             return "Knight"
@@ -244,6 +246,8 @@ class Knight : ChessPiece{
 }
 
 class Bishop : ChessPiece{
+    
+    
     override var name: String{
         get{
             return "Bishop"
@@ -260,6 +264,7 @@ class Bishop : ChessPiece{
 }
 
 class Queen : ChessPiece{
+    
     override var name: String{
         get{
             return "Queen"
@@ -276,7 +281,7 @@ class Queen : ChessPiece{
 }
 
 class King : ChessPiece{
-        
+    
     override var name: String{
         get{
             return "King"

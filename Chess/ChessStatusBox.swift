@@ -21,6 +21,7 @@ class ChessStatusBox: UIView {
     @IBInspectable
     var white : Bool = false{
         didSet{
+            //return
             if white {
                 setWhite()
             }
@@ -111,20 +112,20 @@ class ChessStatusBox: UIView {
         }
     }
     
-    var image : UIImage{
+    var image : UIImage? = nil{
         didSet{
             imageDisplayer.image = image
         }
     }
     
-    var piece : ChessPiece = Pawn(origin: Point(0,0), movement: PawnMovement(), player: Player(name: "", id: 0)){
+    var piece : ChessPiece? = nil{
         didSet{
             updateTitle()
         }
     }
     
     private func updateTitle(){
-        self.title = self.piece.name + "\n" + self.timeText()
+        self.title = self.piece != nil ? self.piece!.name + "\n" + self.timeText() : self.timeText()
     }
     
     var title : String?{
@@ -136,7 +137,10 @@ class ChessStatusBox: UIView {
     }
 
     func setWhite(){
-        self.image = self.image.withRenderingMode(.alwaysTemplate)
+        if self.image == nil{
+            return
+        }
+        //self.image = self.image!.withRenderingMode(.alwaysTemplate)
         self.imageDisplayer.tintColor = UIColor.white
     }
     
@@ -145,10 +149,10 @@ class ChessStatusBox: UIView {
         let offset : CGFloat = 1
         imageDisplayer.frame.origin = CGPoint(x: offset, y: offset)
         imageDisplayer.frame.size = CGSize(width: dimension - 2 * offset, height: dimension - 2 * offset)
-        if let pawn = UIImage(named: "chess-pawn.png"){
+        /*if let pawn = UIImage(named: "chess-pawn.png"){
             image = pawn
         }
-        /*imageDisplayer.layer.borderWidth = 1.0*/
+        imageDisplayer.layer.borderWidth = 1.0*/
         addSubview(imageDisplayer)
     }
     

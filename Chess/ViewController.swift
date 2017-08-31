@@ -13,7 +13,7 @@ import AVFoundation
 
 class ViewController: UIViewController, GameDelegate, SlidingMenuDelegate, StatusBoxDelegate {
 
-    var loadSavedGame = false
+    var loadSavedGame = true
     
     var player2Kind = PlayerType.Human
     
@@ -136,16 +136,15 @@ class ViewController: UIViewController, GameDelegate, SlidingMenuDelegate, Statu
         let _ = self.navigationController?.popViewController(animated: true)
     }
     
-    var selectedPiece : ChessPiece = ChessPiece(origin: Point(0,0), movement: PawnMovement(), player: Player(name: "", id: 1)){
+    // = ChessPiece(origin: Point(0,0), movement: PawnMovement(), player: Player(name: "", id: 1))
+    
+    var selectedPiece : ChessPiece? = nil{
         didSet{
-            let image = pieceImages[selectedPiece.name]!
-            if (self.currentPlayer.id == 1 && selectedPiece.player.id == 1){
-                player1Box.piece = selectedPiece
-                player1Box.image = image!
-                player1Box.setWhite()
-            }else if (self.currentPlayer.id == 2 && selectedPiece.player.id == 2){
-                player2Box.piece = selectedPiece
-                player2Box.image = image!
+            let image = selectedPiece == nil ? nil : self.board.imageForPiece(piece: selectedPiece!)
+            if (self.currentPlayer.id == selectedPiece?.player.id || image == nil){
+                let box = currentPlayer.id == 1 ? player1Box : player2Box
+                box?.piece = selectedPiece
+                box?.image = image
             }
         }
     }
@@ -173,7 +172,7 @@ class ViewController: UIViewController, GameDelegate, SlidingMenuDelegate, Statu
         super.viewDidLoad()
         
         let player2 = player2Kind == .Human ? Human(name: secondPlayerName, id: 2) : Computer(name: secondPlayerName, id: 2)
-        game = Game(p1: Player(name: firstPlayerName, id: 1), p2: player2)
+        game = Game(p1: Human(name: firstPlayerName, id: 1), p2: player2)
         game.gameDelegate = self
         game.boardDelegate = board
         
@@ -184,14 +183,12 @@ class ViewController: UIViewController, GameDelegate, SlidingMenuDelegate, Statu
                 
         game.startGame(clear: self.loadSavedGame == false)
         
-        //game.loadTest1()
-        
         slidingMenu?.show()
         
         UIView.animate(withDuration: 1, animations: {
             self.slidingMenu?.hide()
         })
-        
+                
         // Do any additional setup after loading the view, typically from a nib.
     }
     
@@ -204,6 +201,7 @@ class ViewController: UIViewController, GameDelegate, SlidingMenuDelegate, Statu
         }else{
             player2Box.secondsPassed += 1
         }
+        game.tick() /*Game must also know time to save the game*/
     }
 
     override func didReceiveMemoryWarning() {
@@ -227,7 +225,26 @@ class ViewController: UIViewController, GameDelegate, SlidingMenuDelegate, Statu
         self.statusLabel.text?.append(" -> in Check!")
     }
     
+    func timeWasSet(player : Player, time : Int){
+        if player.id == 1{
+            player1Box.secondsPassed = time
+        }else{
+            player2Box.secondsPassed = time
+        }
+    }
+    
     func didSwitchTurn(player: Player) {
+        
+        
+        
+        let box = player.id == 1 ? player1Box : player2Box
+        if let boxPiece = box?.piece{
+            if !self.game.pieceExists(piece: boxPiece){
+                box?.piece = nil
+                box?.image = nil
+            }
+        }
+        
         if let chk = check{
             if chk != player{
                 check = nil
@@ -269,15 +286,15 @@ class ViewController: UIViewController, GameDelegate, SlidingMenuDelegate, Statu
     }
     
     func pieceDeselected() {
-        //self.selectedPiece = nil
+        self.selectedPiece = nil
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if let dest = (segue.destination as? DeletedPiecesTableViewController){
             dest.first_player = game.firstPlayer
             dest.second_player = game.secondPlayer
-            dest.first_pieces = game.player1Deleted
-            dest.second_pieces = game.player2Deleted
+            //dest.first_pieces = game.player1Deleted
+            //dest.second_pieces = game.player2Deleted
         }
     }
     

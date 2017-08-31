@@ -17,18 +17,23 @@ class Tile : UIBezierPath{
     
 }
 
-protocol UIBoardDelegate{
+protocol BoardDelegate{
     func pieceTapped(piece : ChessPiece) -> [Point]
-    func moveRequested(newLocation : (x : Float, y : Float))
+    func moveRequested(newLocation : (x : Float, y : Float)) -> Bool
 }
 
 @IBDesignable
 
 class UIBoard : UIView, ChessBoardDelegate, UIChessPieceDelegate{
-    
+
     var allowedLocations = [Point]()
     var tiles = [Tile]()
-    var delegate : UIBoardDelegate?
+    var delegate : BoardDelegate?
+    var originalPiecePosition : CGPoint?
+    
+    func imageForPiece(piece : ChessPiece) -> UIImage?{
+        return pieces["\(piece.origin.x)\(piece.origin.y)"]?.Image
+    }
     
     internal func pieceRemoved(piece: ChessPiece) {
 
@@ -195,20 +200,25 @@ class UIBoard : UIView, ChessBoardDelegate, UIChessPieceDelegate{
      another box, try that other box too
      */
     
+    func screenToPointCoordinates(x : CGFloat, y : CGFloat) -> (x : CGFloat, y : CGFloat){
+        let new_x = (x / (self.frame.size.width / 8))
+        let new_y = (y / (self.frame.size.height / 8))
+        return (new_x, new_y)
+    }
+    
     internal func handleTap(tap : UITapGestureRecognizer){
         let tapLocation = tap.location(in: self)
         //convert screen x and y to coordinate x and y
-        let new_x = (tapLocation.x / (self.frame.size.width / 8))
-        let new_y = (tapLocation.y / (self.frame.size.height / 8))
-        delegate?.moveRequested(newLocation: (Float(new_x), Float(new_y)))
+        let (new_x, new_y) = screenToPointCoordinates(x: tapLocation.x, y: tapLocation.y)
+        let _ = delegate?.moveRequested(newLocation: (Float(new_x), Float(new_y)))
     }
     
     func pieceDidChangePosition(piece: ChessPiece, oldPosition: Point) {
-        let new_frame = CGRect(x: xPoint(x: piece.x), y: yPoint(y: piece.y), width:frame.size.width / 8, height:frame.size.height / 8)
+        let new_point = CGPoint(x: xPoint(x: piece.x), y: yPoint(y: piece.y))
         if let existingPiece = pieces["\(oldPosition.x)\(oldPosition.y)"]{
             print(Settings.animations)
             UIView.animate(withDuration: Settings.animations ? 0.5 : 0.0, animations: {
-                existingPiece.frame = new_frame
+                existingPiece.frame.origin = new_point
             })
             pieces["\(piece.x)\(piece.y)"] = existingPiece
         }else{
@@ -217,13 +227,47 @@ class UIBoard : UIView, ChessBoardDelegate, UIChessPieceDelegate{
         pieces.removeValue(forKey: "\(oldPosition.x)\(oldPosition.y)")
         self.allowedLocations = [Point]()
         self.setNeedsDisplay()
-    }
         
+        //UIImageWriteToSavedPhotosAlbum(self.snapshot()!, nil, nil, nil)
+        self.originalPiecePosition = nil
+    }
+    
     internal func pieceSelected(piece: ChessPiece) {
         if let locations = delegate?.pieceTapped(piece: piece){
             if Settings.allowedMoves{
                 self.allowedLocations = locations
                 self.setNeedsDisplay()
+            }
+        }
+    }
+    
+    func piecePanned(piece : UIChessPiece, location: CGPoint) {
+        if let positions = delegate?.pieceTapped(piece: piece.Piece){
+            if positions.isEmpty{
+                return
+            }
+        }
+        
+        if originalPiecePosition == nil{
+            originalPiecePosition = piece.frame.origin
+        }
+        
+        piece.frame.origin = CGPoint(x: location.x - piece.frame.size.width / 2, y: location.y - piece.frame.size.height / 2)
+    }
+    
+    func pieceDropped(piece: UIChessPiece) {
+        let currentLocation = piece.frame.origin
+        let screenPoint = screenToPointCoordinates(x: currentLocation.x, y: currentLocation.y)
+        print(screenPoint)
+        
+        if let moved = delegate?.moveRequested(newLocation: (Float(screenPoint.x), Float(screenPoint.y))){
+            if !moved{
+                if let originalLocation = originalPiecePosition{
+                    UIView.animate(withDuration: Settings.animations ? 0.5 : 0.0, animations: {
+                        piece.frame.origin = originalLocation //move back to original position
+                    })
+                    originalPiecePosition = nil //reset the original location
+                }
             }
         }
     }

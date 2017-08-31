@@ -13,18 +13,27 @@ var pieceImages = ["Pawn" : UIImage(named: "chess-pawn.png"), "Bishop" : UIImage
 
 protocol UIChessPieceDelegate {
     func pieceSelected(piece : ChessPiece)
+    func piecePanned(piece : UIChessPiece, location : CGPoint)
+    func pieceDropped(piece : UIChessPiece)
 }
 
 enum ChessPieceError: Error {
     case NullDelegate
 }
 
+@IBDesignable
 class UIChessPiece : UIView{
+    
+    private var dragGesture = UIPanGestureRecognizer()
     
     private var image = UIImageView()
     
     var Piece : ChessPiece{
         return self.piece
+    }
+    
+    var Image : UIImage?{
+        return self.image.image
     }
     
     var delegate : UIChessPieceDelegate?
@@ -84,6 +93,8 @@ class UIChessPiece : UIView{
         super.init(frame: frame)
         self.initAspect()
         self.initGesture()
+        self.dragGesture = UIPanGestureRecognizer(target: self, action: #selector(panning(_:)))
+        self.addGestureRecognizer(self.dragGesture)
     }
     
     func clearImage(){
@@ -115,7 +126,19 @@ class UIChessPiece : UIView{
         self.initAspect()
     }
 
-    
+    func panning(_ gesture : UIPanGestureRecognizer){
+        do {
+            try self.pieceTapped()
+        }
+        catch{
+        
+        }
+        if gesture.state != .ended{
+            delegate?.piecePanned(piece: self, location: gesture.location(in: self.superview))
+        }else {
+            delegate?.pieceDropped(piece: self)
+        }
+    }
 }
 
 

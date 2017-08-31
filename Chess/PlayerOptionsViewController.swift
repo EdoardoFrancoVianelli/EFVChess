@@ -21,20 +21,24 @@ class PlayerOptionsViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        //self.performSegue(withIdentifier: "gameTransitionSegue", sender: self)
+        //self.performSegue(withIdentifier: "IconSegue", sender: self)
+
+        
+        /*
         if FileManager.default.fileExists(atPath: Settings.gameFilePath){
-            self.performSegue(withIdentifier: "gameTransitionSegue", sender: self)
-            /*
-             //ASK THE USER TO LOAD THE SAVED GAME
-             let resume_alert = UIAlertController(title: "Load saved game?", message: nil, preferredStyle: .alert)
-             resume_alert.addAction(UIAlertAction(title: "Yes", style: .default, handler: {
-             (action : UIAlertAction?) in
-             self.loadSavedGame = true
-             self.performSegue(withIdentifier: "gameTransitionSegue", sender: self)
-             }))
-             resume_alert.addAction(UIAlertAction(title: "No", style: .cancel, handler: nil))
-             self.present(resume_alert, animated: true, completion: nil)
-             */
+            //ASK THE USER TO LOAD THE SAVED GAME
+            let resume_alert = UIAlertController(title: "Load saved game?", message: nil, preferredStyle: .alert)
+            resume_alert.addAction(UIAlertAction(title: "Yes", style: .default, handler: {
+            (action : UIAlertAction?) in
+                self.loadSavedGame = true
+                self.performSegue(withIdentifier: "gameTransitionSegue", sender: self)
+            }))
+            resume_alert.addAction(UIAlertAction(title: "No", style: .cancel, handler: nil))
+            self.present(resume_alert, animated: true, completion: nil)
+ 
         }
+         */
         // Do any additional setup after loading the view.
     }
 
@@ -53,6 +57,7 @@ class PlayerOptionsViewController: UIViewController {
     
     @IBAction func modeSelected(_ sender: UISegmentedControl) {
         player2Type = sender.selectedSegmentIndex == 0 ? .Human : .CPU
+        self.loadSavedGame = false
     }
 
     

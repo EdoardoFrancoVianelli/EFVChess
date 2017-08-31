@@ -35,8 +35,12 @@
 		A8531E3D1E530415004D553F /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A8531E3C1E530415004D553F /* AVFoundation.framework */; };
 		A8531E451E55073B004D553F /* wood-texture.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A8531E441E55073B004D553F /* wood-texture.jpg */; };
 		A8531E471E550B6E004D553F /* ChessStatusBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8531E461E550B6E004D553F /* ChessStatusBox.swift */; };
+		A8623A101EE770A300177BAF /* GameStats.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8623A0F1EE770A300177BAF /* GameStats.swift */; };
 		A8B1FA631E60E991008F2E76 /* SlidingMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8B1FA621E60E991008F2E76 /* SlidingMenu.swift */; };
 		A8B539DC1E8C692F00FB0153 /* TransparentMessageBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8B539DB1E8C692F00FB0153 /* TransparentMessageBox.swift */; };
+		A8B9BA3E1F5871A400EE05CF /* IconMakerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8B9BA3D1F5871A400EE05CF /* IconMakerViewController.swift */; };
+		A8B9BA401F5871B300EE05CF /* IconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8B9BA3F1F5871B300EE05CF /* IconView.swift */; };
+		A8CE1FA91EC9963B00F9734F /* ChessCanvasViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8CE1FA81EC9963B00F9734F /* ChessCanvasViewController.swift */; };
 		A8EFFC3E1EAB3E0A00FC2891 /* Deprecated.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8EFFC3D1EAB3E0A00FC2891 /* Deprecated.swift */; };
 /* End PBXBuildFile section */
 
@@ -92,8 +96,12 @@
 		A8531E3C1E530415004D553F /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		A8531E441E55073B004D553F /* wood-texture.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "wood-texture.jpg"; sourceTree = "<group>"; };
 		A8531E461E550B6E004D553F /* ChessStatusBox.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChessStatusBox.swift; sourceTree = "<group>"; };
+		A8623A0F1EE770A300177BAF /* GameStats.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GameStats.swift; sourceTree = "<group>"; };
 		A8B1FA621E60E991008F2E76 /* SlidingMenu.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SlidingMenu.swift; sourceTree = "<group>"; };
 		A8B539DB1E8C692F00FB0153 /* TransparentMessageBox.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransparentMessageBox.swift; sourceTree = "<group>"; };
+		A8B9BA3D1F5871A400EE05CF /* IconMakerViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IconMakerViewController.swift; sourceTree = "<group>"; };
+		A8B9BA3F1F5871B300EE05CF /* IconView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IconView.swift; sourceTree = "<group>"; };
+		A8CE1FA81EC9963B00F9734F /* ChessCanvasViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChessCanvasViewController.swift; sourceTree = "<group>"; };
 		A8EFFC3D1EAB3E0A00FC2891 /* Deprecated.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Deprecated.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -184,6 +192,7 @@
 				A8B539DB1E8C692F00FB0153 /* TransparentMessageBox.swift */,
 				A8389C191EA3504100A22EA5 /* Settings.swift */,
 				A8EFFC3D1EAB3E0A00FC2891 /* Deprecated.swift */,
+				A8623A0F1EE770A300177BAF /* GameStats.swift */,
 			);
 			path = Chess;
 			sourceTree = "<group>";
@@ -223,9 +232,12 @@
 			isa = PBXGroup;
 			children = (
 				A8531DEB1E405F4B004D553F /* ViewController.swift */,
+				A8B9BA3D1F5871A400EE05CF /* IconMakerViewController.swift */,
+				A8B9BA3F1F5871B300EE05CF /* IconView.swift */,
 				A8531E251E4BFAE6004D553F /* GameSelectionTableViewController.swift */,
 				A8531E361E52FBA6004D553F /* PlayerOptionsViewController.swift */,
 				A8531E341E4E3DAD004D553F /* DeletedPiecesTableViewController.swift */,
+				A8CE1FA81EC9963B00F9734F /* ChessCanvasViewController.swift */,
 			);
 			name = "Various View Controllers";
 			sourceTree = "<group>";
@@ -382,6 +394,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A805F2401E75F8E7005E0B78 /* Move.swift in Sources */,
+				A8B9BA401F5871B300EE05CF /* IconView.swift in Sources */,
 				A8531DEC1E405F4B004D553F /* ViewController.swift in Sources */,
 				A8531E1A1E405F6B004D553F /* ChessBoard.swift in Sources */,
 				A8531E221E4BF7AB004D553F /* Game.swift in Sources */,
@@ -390,8 +403,11 @@
 				A8531E1E1E406EE1004D553F /* UIChessPiece.swift in Sources */,
 				A8531E471E550B6E004D553F /* ChessStatusBox.swift in Sources */,
 				A8531DEA1E405F4B004D553F /* AppDelegate.swift in Sources */,
+				A8623A101EE770A300177BAF /* GameStats.swift in Sources */,
 				A8531E261E4BFAE6004D553F /* GameSelectionTableViewController.swift in Sources */,
 				A8389C1A1EA3504100A22EA5 /* Settings.swift in Sources */,
+				A8B9BA3E1F5871A400EE05CF /* IconMakerViewController.swift in Sources */,
+				A8CE1FA91EC9963B00F9734F /* ChessCanvasViewController.swift in Sources */,
 				A8531E351E4E3DAD004D553F /* DeletedPiecesTableViewController.swift in Sources */,
 				A8531E181E405F61004D553F /* ChessPiece.swift in Sources */,
 				A8531E371E52FBA6004D553F /* PlayerOptionsViewController.swift in Sources */,

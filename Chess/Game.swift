@@ -16,6 +16,7 @@ protocol GameDelegate {
     func gameOver(loser : Player)
     func gameStarted()
     func pieceMoved(piece : ChessPiece)
+    func timeWasSet(player : Player, time : Int)
 }
 
 enum PlayerType {
@@ -27,10 +28,25 @@ func inRange(x : Int, lo : Int, hi : Int) -> Bool{
     return x >= lo && x <= hi
 }
 
-class Game : UIBoardDelegate{
+class Game : BoardDelegate{
     
     private var player1King : King
     private var player2King : King
+    private var undoStack = [Move]()
+    private var redoStack = [Move]()
+    private var board = ChessBoard(player1Name: "", player2Name: "")
+    private var _stats = GameStats()
+    
+    private var _player1 : Player{
+        didSet{
+            print("Setting player 1")
+        }
+    }
+    private var _player2 : Player{
+        didSet{
+            print("Setting player 2")
+        }
+    }
     
     var firstPlayerKing : ChessPiece {
         get{
@@ -52,9 +68,6 @@ class Game : UIBoardDelegate{
         return pieceVulnerable(piece: player2King)
     }
     
-    private var undoStack = [Move]()
-    private var redoStack = [Move]()
-    
     private var pendingMove : Move?{
         get{
             return undoStack.popLast()
@@ -74,13 +87,9 @@ class Game : UIBoardDelegate{
         }
     }
     
-    private var player1removed = [ChessPiece]()
-    private var player2removed = [ChessPiece]()
-    
-    private var board = ChessBoard(player1Name: "", player2Name: "")
-    
-    var player1Deleted : [ChessPiece]{ return player1removed }
-    var player2Deleted : [ChessPiece]{ return player2removed }
+    var Stats : GameStats{
+        return _stats
+    }
     
     var gameDelegate : GameDelegate?
     
@@ -91,18 +100,6 @@ class Game : UIBoardDelegate{
             return board.delegate
         }
     }
-        
-    private var _player1 : Player{
-        didSet{
-            print("Setting player 1")
-        }
-    }
-    private var _player2 : Player{
-        didSet{
-            print("Setting player 2")
-        }
-    }
-
     
     var firstPlayer : Player { return _player1 }
     var secondPlayer : Player{ return _player2 }
@@ -144,14 +141,16 @@ class Game : UIBoardDelegate{
         moved.origin = oldPosition
     }
     
-    private func verifyCheckMate(p : Player, attackingPiece : ChessPiece, attacked : ChessPiece) -> Bool{ //check if the current player is in checkmate
+    private func verifyCheckMate(p : Player, attacked : ChessPiece) -> Bool{ //check if the current player is in checkmate
         //checkmate if the attacking piece cannot be blocked or eaten
         
-        let kingAttacker = pieceVulnerable(piece: attackingPiece)
-        let blockingPiece = pieceCanBeBlockedFromAttackingPiece(attacker: attackingPiece, attacked: attacked)
-        let escape_possible = canEscapeAll(piece: attacked)
+        if let kingAttacker = pieceVulnerable(piece: attacked){
+            let blockingPiece = pieceCanBeBlockedFromAttackingPiece(attacker: kingAttacker, attacked: attacked)
+            let escape_possible = canEscapeAll(piece: attacked)
+            return blockingPiece == nil && !escape_possible
+        }
         
-        return kingAttacker == nil && blockingPiece == nil && !escape_possible
+        return false
     }
     
     func undoPendingMove(){
@@ -189,9 +188,17 @@ class Game : UIBoardDelegate{
         }
         do {
             let fileContents = try String(contentsOfFile: Settings.gameFilePath)
+            print(fileContents)
             let lines = fileContents.components(separatedBy: "\n")
-            let p1Name = lines[0]
-            let p2Name = lines[1]
+            let player1Info = lines[0].components(separatedBy: ",")
+            let player2Info = lines[1].components(separatedBy: ",")
+            let p1Name = player1Info[0] /*Grab the name of the first player*/
+            let p2Name = player2Info[0] /*Grab the name of the second player*/
+            self._player1 = Human(name: p1Name, id: 1)
+            self._player2 = player2Info[2] == "0" ? Human(name: p2Name, id: 2) : Computer(name: p2Name, id: 2)
+            self._stats = GameStats(p1Elapsed: Int(player1Info[1])!, p2Elapsed: Int(player2Info[1])!)//init the stats
+            self.gameDelegate?.timeWasSet(player: _player1, time: self._stats.player1Elapsed)
+            self.gameDelegate?.timeWasSet(player: _player2, time: self._stats.player2Elapsed)
             for i in 2..<lines.count-1{ //skip the last newline
                 let line_components = lines[i].components(separatedBy: Settings.fileDelimiter)
                 let (x, y) = (Int(line_components[1]),Int(line_components[2]))
@@ -200,7 +207,7 @@ class Game : UIBoardDelegate{
                     createGamePieces()
                     return
                 }
-                let line_player = Player(name: player_id == 1 ? p1Name : p2Name, id: player_id!)
+                let line_player = player_id == 1 ? _player1 : _player2
                 let origin = Point(x!, y!)
                 var piece : ChessPiece?
                 if line_components[0] == Queen().name{
@@ -237,8 +244,8 @@ class Game : UIBoardDelegate{
     private func saveGame(){
         //queen, king, bishop, knight, rook, pawn
         var wholeFile = ""
-        wholeFile += "\(_player1.name)\n"
-        wholeFile += "\(_player2.name)\n"
+        wholeFile += "\(_player1.name),\(Stats.player1Elapsed),\(0)\n"
+        wholeFile += "\(_player2.name),\(Stats.player2Elapsed),\(self._player2 is Computer ? 1 : 0)\n"
         for piecePair in self.board.pieces{
             wholeFile += (piecePair.value.name + Settings.fileDelimiter)
             wholeFile += "\(piecePair.value.origin.x)" + Settings.fileDelimiter
@@ -250,7 +257,7 @@ class Game : UIBoardDelegate{
         }catch{
             print("Something went wrong")
         }
-        print(wholeFile)
+        //print(wholeFile)
     }
     
     private func switchTurns(){
@@ -263,15 +270,19 @@ class Game : UIBoardDelegate{
         }
     }
     
+    func pieceExists(piece : ChessPiece) -> Bool{
+        return self.board.pieceAt(x: piece.x, y: piece.y) == piece
+    }
+    
     private func switchTurns(moved : ChessPiece, oldPosition : Point, pieceRemoved : ChessPiece?){
         
         if gameOver { return }
         
-        if let attacker = (currentTurn == _player1) ? player1Check : player2Check{
+        if let _ = (currentTurn == _player1) ? player1Check : player2Check{
             let king     = (currentTurn == _player1) ? firstPlayerKing : secondPlayerKing
             playerInCheck(p: currentTurn, moved: moved, oldPosition: oldPosition, consumedPiece: pieceRemoved)
             
-            if verifyCheckMate(p: currentTurn, attackingPiece: attacker, attacked: king){
+            if verifyCheckMate(p: currentTurn, attacked: king){
                 self.gameOver = true
             }
             
@@ -295,11 +306,13 @@ class Game : UIBoardDelegate{
     }
     
     private func pieceRemoved(piece : ChessPiece){
+        /*
         if piece.player == _player1{
             player1removed.append(piece)
         }else if piece.player == _player2{
             player2removed.append(piece)
         }
+         */
     }
     
     func setPlayerNames(p1 : String, p2 : String){
@@ -446,27 +459,40 @@ class Game : UIBoardDelegate{
         addPiece(piece: Queen(origin: Point(4,7), movement: QueenMovement(), player: firstPlayer))
     }
 
-    internal func moveRequested(newLocation: (x: Float, y: Float)) {
+    internal func moveRequested(newLocation: (x: Float, y: Float)) -> Bool{
         if selected == nil{
-            return
+            return false
         }
-        let x = newLocation.x
-        let y = newLocation.y
-        let x_diff = x - Float(Int(x))
-        let y_diff = y - Float(Int(y))
-        DispatchQueue.main.async {
-            let locations : (x : Int, y : Int) = (Int(x), Int(y))
-            let increments : [(x : Int, y : Int)] = [(0, 1), (0, -1), (1, 0), (-1, 0)]
-            let conditions : [Bool] = [(y_diff >= 0.9), (y_diff <= 0.1), (x_diff >= 0.9), (x_diff <= 0.1)]
-            if !self.changePiecePosition(piece: self.selected!, newPosition: Point(locations.x, locations.y)){
-                for i in 0..<4{
-                    let current : (x : Int, y : Int) = (locations.x + increments[i].x, locations.y + increments[i].y)
-                    if conditions[i] && self.changePiecePosition(piece: self.selected!, newPosition: Point(current.x, current.y)){
-                        break
-                    }
+        
+        let x = Int(newLocation.x)
+        let y = Int(newLocation.y)
+        //let x_diff = newLocation.x - Float(Int(newLocation.x))
+        //let y_diff = newLocation.y - Float(Int(newLocation.y))
+        //DispatchQueue.main.async {
+            let increments : [(x : Int, y : Int)] = [(0,0), (0, 1), (0, -1), (1, 0), (-1, 0)]
+            //let conditions : [Bool] = [true, (y_diff >= 0.9), (y_diff <= 0.1), (x_diff >= 0.9), (x_diff <= 0.1)]
+            for i in 0..<increments.count{
+                let current : (x : Int, y : Int) = (x + increments[i].x, y + increments[i].y)
+                if self.changePiecePosition(piece: self.selected!, newPosition: Point(current.x, current.y)){
+                    return true
                 }
             }
+        //}
+
+        return false
+        /*
+        
+        let rounded : (x : Int, y : Int) = (Int(roundf(newLocation.x)), Int(roundf(newLocation.y)))
+        DispatchQueue.main.async {
+            let _ = self.changePiecePosition(piece: self.selected!, newPosition: Point(Int(newLocation.x), Int(rounded.y)))
+            //let _ = self.changePiecePosition(piece: self.selected!, newPosition: Point(rounded.x, rounded.y))
         }
+ 
+         */
+        
+        
+        
+        //self.changePiecePosition(piece: self.selected!, newPosition: Point(Int(newLocation.x), Int(newLocation.y)))
     }
     
     internal func pieceTapped(piece: ChessPiece) -> [Point]{
@@ -720,6 +746,14 @@ class Game : UIBoardDelegate{
         return nil
     }
     
+    func tick(){
+        if currentTurn == _player1{
+            _stats.player1TimeTicked()
+        }else{
+            _stats.player2TimeTicked()
+        }
+    }
+    
     /*MARK: AI Functions*/
     
     func MovesForPiece(piece : ChessPiece) -> [Move]{
@@ -745,26 +779,54 @@ class Game : UIBoardDelegate{
         return moves
     }
     
+    /*
+     player 1 is the white pieces
+     player 2 is the black pieces
+     */
+    
+    func pieceValue(piece : ChessPiece) -> Int{
+        if piece is Pawn{
+            return 10
+        }else if piece is Knight{
+            return 30
+        }else if piece is Bishop{
+            return 30
+        }else if piece is Rook{
+            return 50
+        }else if piece is Queen{
+            return 90
+        }else if piece is King{
+            return 100
+        }
+        return 0
+    }
+    
     func executeAITurn(player : Player){
         /*Get all the moves and prioritize the ones that result in a capture*/
-        var allMoves = GetAllMoves(player: player).sorted(by: { (m1 : Move, m2 : Move) in m1.consumedPiece != nil && m2.consumedPiece == nil})
-        /*GET A RANDOM MOVE*/
-        var random_index = Int(arc4random_uniform(UInt32(allMoves.count)))
-        var move = allMoves[0].consumedPiece == nil ? allMoves[random_index] : allMoves[0]
-        executeMove(move: move)
-        
-        while player2Check != nil{ /*GET OUT OF CHECK IF NEEDED*/
-            undoPendingMove() /*THE PREVIOUS MOVE GOT US IN CHECK SO IT WAS NO GOOD, UNDO IT*/
-            allMoves.remove(at: random_index) /*REMOVE THE MOVE THAT WOULD BRING US TO CHECK*/
-            if allMoves.isEmpty{ /*WE LOST*/
-                if verifyCheckMate(p: player, attackingPiece: player2Check!, attacked: player2King){
+        var allMoves = GetAllMoves(player: player).sorted(by: { (m1 : Move, m2 : Move) in
+            
+            let firstValue = m1.consumedPiece == nil ? 0 : pieceValue(piece: m1.consumedPiece!)
+            let secondValue = m2.consumedPiece == nil ? 0 : pieceValue(piece: m2.consumedPiece!)
+            
+            return m1.consumedPiece != nil && m2.consumedPiece == nil && firstValue > secondValue
+        })
+    
+        while true { /*GET OUT OF CHECK IF NEEDED*/
+            if allMoves.isEmpty { /*WE LOST*/
+                if verifyCheckMate(p: player, attacked: player2King){
                     gameOver = true
                 }
                 return
             }
-            random_index = Int(arc4random_uniform(UInt32(allMoves.count)))
-            move = allMoves[0].consumedPiece == nil ? allMoves[random_index] : allMoves[0]
-            executeMove(move: move)
+            /*GET A RANDOM MOVE*/
+            let random_index = 0
+            //let start_count = self.player2Deleted.count
+            executeMove(move: allMoves[random_index])
+            if player2Check == nil /*&& start_count <= self.player2Deleted.count*/{
+                break
+            }
+            allMoves.remove(at: random_index) /*REMOVE THE MOVE THAT WOULD BRING US TO CHECK*/
+            undoPendingMove() /*THE PREVIOUS MOVE GOT US IN CHECK SO IT WAS NO GOOD, UNDO IT*/
         }
         
         self.confirmPendingMove()
