@@ -132,7 +132,19 @@ class ChessStatusBox: UIView {
         get{
             return pieceLabel.text
         }set{
-            pieceLabel.text = newValue
+            if title == nil{
+                return
+            }
+            let attributedString = NSMutableAttributedString(string: newValue!)
+            if let timeFont = UIFont.init(name: "HelveticaNeue-Thin", size: 20){
+                if let newLineLocation = newValue?.characters.index(of: "\n"){
+                    let index = self.title!.distance(from: newValue!.startIndex, to: newLineLocation)
+                    attributedString.addAttribute(NSFontAttributeName, value: timeFont, range: NSMakeRange(index, newValue!.characters.count-index))
+                }else{
+                    attributedString.addAttribute(NSFontAttributeName, value: timeFont, range: NSMakeRange(0, newValue!.characters.count))
+                }
+            }
+            pieceLabel.attributedText = attributedString
         }
     }
 
