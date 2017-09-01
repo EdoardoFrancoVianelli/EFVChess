@@ -327,9 +327,12 @@ class Game : BoardDelegate{
     private func executeMove(move : Move){
         self.pendingMove = move
         if let to_capture = move.consumedPiece{
-            if self.consume(piece1: move.piece, piece2: to_capture) != nil{
+            if pieceCanEat(piece: move.piece, other: to_capture){
+                self.board.removePiece(piece: to_capture)
+                move.piece.origin = Point(to_capture.x, to_capture.y)
                 pieceRemoved(piece: to_capture)
-            }else{
+            }else {
+                print("\(move.piece) cannot eat \(to_capture)")
                 return
             }
         }
@@ -367,19 +370,6 @@ class Game : BoardDelegate{
         for element in self.board.pieces{
             self.board.removePiece(piece: element.value)
         }
-    }
-    
-    private func consume(piece1 : ChessPiece, piece2 : ChessPiece) -> ChessPiece?{
-        
-        if pieceCanEat(piece: piece1, other: piece2){
-            self.board.removePiece(piece: piece2)
-            piece1.origin = Point(piece2.x, piece2.y)
-            return piece2
-        }else {
-            print("\(piece1) cannot eat \(piece2)")
-        }
-        
-        return nil
     }
     
     private func consumePiece(piece1 : ChessPiece, piece2 : ChessPiece) -> Bool{
@@ -493,6 +483,20 @@ class Game : BoardDelegate{
         
         
         //self.changePiecePosition(piece: self.selected!, newPosition: Point(Int(newLocation.x), Int(newLocation.y)))
+    }
+    
+    internal func pieceDropped(piece: ChessPiece, newLocation : Point) -> Bool{
+        //check if there is a piece in the same location
+        if let targetedPiece = self.board.pieceAt(x: newLocation.x, y: newLocation.y){
+            if targetedPiece.player != piece.player && piece.Moves.contains(targetedPiece.origin){
+                let _ = self.consumePiece(piece1: piece, piece2: targetedPiece)
+                return true
+            }else{
+                return false
+            }
+        }
+        
+        return self.changePiecePosition(piece: piece, newPosition: newLocation)
     }
     
     internal func pieceTapped(piece: ChessPiece) -> [Point]{

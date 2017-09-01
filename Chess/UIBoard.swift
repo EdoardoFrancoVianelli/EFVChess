@@ -18,6 +18,7 @@ class Tile : UIBezierPath{
 }
 
 protocol BoardDelegate{
+    func pieceDropped(piece : ChessPiece, newLocation : Point) -> Bool
     func pieceTapped(piece : ChessPiece) -> [Point]
     func moveRequested(newLocation : (x : Float, y : Float)) -> Bool
 }
@@ -260,8 +261,9 @@ class UIBoard : UIView, ChessBoardDelegate, UIChessPieceDelegate{
         let screenPoint = screenToPointCoordinates(x: currentLocation.x, y: currentLocation.y)
         print(screenPoint)
         
-        if let moved = delegate?.moveRequested(newLocation: (Float(screenPoint.x), Float(screenPoint.y))){
-            if !moved{
+        let boardPoint = Point(Int(round(screenPoint.x)),Int(round(screenPoint.y)))
+        if let dropped = self.delegate?.pieceDropped(piece: piece.Piece, newLocation: boardPoint){
+            if !dropped{
                 if let originalLocation = originalPiecePosition{
                     UIView.animate(withDuration: Settings.animations ? 0.5 : 0.0, animations: {
                         piece.frame.origin = originalLocation //move back to original position
